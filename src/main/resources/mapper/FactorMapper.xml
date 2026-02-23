@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.oilrisk_alert.mapper.FactorMapper">
+
+    <select id="findLatestDate" resultType="java.time.LocalDate">
+        SELECT MAX(date) FROM risk_factor
+    </select>
+
+    <select id="findByDate" resultType="com.example.oilrisk_alert.entity.RiskFactor">
+        SELECT id, date, factor_name, factor_name_zh, category, "value", shap_value, created_at
+        FROM risk_factor
+        WHERE date = #{param1}
+        ORDER BY ABS(shap_value) DESC
+    </select>
+
+    <select id="findTopByDateOrderByAbsShap" resultType="com.example.oilrisk_alert.entity.RiskFactor">
+        SELECT id, date, factor_name, factor_name_zh, category, "value", shap_value, created_at
+        FROM risk_factor
+        WHERE date = #{param1}
+        ORDER BY ABS(shap_value) DESC
+        LIMIT #{param2}
+    </select>
+
+</mapper>

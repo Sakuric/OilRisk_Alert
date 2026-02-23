@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /mnt/c/Users/asus/Desktop/OilRisk_Alert/frontend -name \"*.css\" -o -name \"*.scss\" 2>/dev/null | head -5)",
+      "Bash(python3 --version 2>/dev/null || python --version 2>/dev/null; pip3 show pandas 2>/dev/null | head -2)",
+      "Bash(python3 -c \"import pandas; import numpy; print\\('pandas', pandas.__version__, 'numpy', numpy.__version__\\)\" 2>&1)",
+      "Bash(pip3 install pandas numpy --quiet 2>&1 | tail -3)",
+      "Bash(python3 -m pip install pandas numpy --quiet 2>&1 | tail -3)",
+      "Bash(apt-get install -y python3-pandas python3-numpy 2>&1 | tail -5)",
+      "Bash(sudo apt-get install -y python3-pandas python3-numpy 2>&1 | tail -5)",
+      "Bash(python3 -c \"\nimport csv\nwith open\\('/mnt/c/Users/asus/Desktop/OilRisk_Alert/data/Final_Oil_Dataset_Cleaned.csv'\\) as f:\n    headers = next\\(csv.reader\\(f\\)\\)\n# Print index and column name for key columns\nkeywords = ['Brent原油期_收盘', 'VIX恐慌指数', '地缘政治事件综合评分', '俄乌冲突', '中东局势', '新闻情感指数', '美元指数_日频', 'T10YIE', 'Cushing', 'OPEC每月原油_OPEC石油输出', 'Baker_Hu', '情绪组_GPR', 'OVX', 'SP500_Close', 'EURUSD', 'Brent原油期_涨跌幅']\nfor kw in keywords:\n    for i, h in enumerate\\(headers\\):\n        if kw in h:\n            print\\(f'{i}: {h}'\\)\n            break\n\")",
+      "Bash(python3 -c \"\nimport csv\nwith open\\('/mnt/c/Users/asus/Desktop/OilRisk_Alert/data/Final_Oil_Dataset_Cleaned.csv'\\) as f:\n    headers = next\\(csv.reader\\(f\\)\\)\nfor i, h in enumerate\\(headers\\):\n    if 'Geopolitics' in h or '俄乌' in h:\n        print\\(f'{i}: {h}'\\)\n\")"
+    ]
+  }
+}
