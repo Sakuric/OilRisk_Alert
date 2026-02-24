@@ -26,54 +26,62 @@ function getOption(): echarts.EChartsOption {
   const themeOpts = echartsThemeConfig.value
   const names = sorted.value.map((f) => (isZh.value ? f.nameZh : f.name))
   const values = sorted.value.map((f) => f.shap)
-  const colors = values.map((v) => (v >= 0 ? '#58a6ff' : '#f85149'))
+  const posColor = '#8b5cf6'
+  const negColor = '#f43f5e'
 
   return {
-    ...themeOpts,
-    animationDuration: 800,
-    animationEasing: 'cubicOut',
+    backgroundColor: 'transparent',
+    animationDuration: 1200,
     tooltip: {
-      ...themeOpts.tooltip,
       trigger: 'axis',
       axisPointer: { type: 'shadow' },
+      backgroundColor: isDark.value ? 'rgba(8, 11, 26, 0.9)' : 'rgba(255, 255, 255, 0.95)',
+      borderColor: isDark.value ? 'rgba(139, 92, 246, 0.2)' : 'rgba(0, 0, 0, 0.1)',
+      textStyle: { color: isDark.value ? '#f1f1f8' : '#1a1a2e' }
     },
     grid: {
-      left: 120,
-      right: 30,
+      left: '5%',
+      right: '10%',
       top: 10,
       bottom: 10,
+      containLabel: true
     },
     xAxis: {
       type: 'value',
-      name: t('overview.factorChart.shapValue'),
-      ...(themeOpts.xAxis as Record<string, unknown>),
+      axisLine: { show: false },
+      axisTick: { show: false },
+      splitLine: { lineStyle: { color: isDark.value ? 'rgba(139, 92, 246, 0.08)' : 'rgba(0, 0, 0, 0.06)' } },
+      axisLabel: { color: isDark.value ? '#b0b3d0' : '#4a4d6a', fontSize: 10 }
     },
     yAxis: {
       type: 'category',
       data: names,
-      ...(themeOpts.yAxis as Record<string, unknown>),
+      axisLine: { lineStyle: { color: isDark.value ? 'rgba(139, 92, 246, 0.15)' : 'rgba(0, 0, 0, 0.08)' } },
+      axisTick: { show: false },
       axisLabel: {
-        color: isDark.value ? '#8b949e' : '#57606a',
-        fontSize: 12,
+        color: isDark.value ? '#f1f1f8' : '#1a1a2e',
+        fontSize: 11,
       },
     },
     series: [
       {
         type: 'bar',
-        data: values.map((v, i) => ({
+        data: values.map((v) => ({
           value: v,
-          itemStyle: { color: colors[i] },
+          itemStyle: {
+            color: v >= 0 ? posColor : negColor,
+            borderRadius: v >= 0 ? [0, 4, 4, 0] : [4, 0, 0, 4],
+            shadowBlur: 8,
+            shadowColor: v >= 0 ? posColor : negColor,
+          },
         })),
-        barWidth: '60%',
+        barWidth: 14,
         label: {
           show: true,
           position: 'right',
-          color: isDark.value ? '#e6edf3' : '#24292f',
-          fontSize: 11,
-          formatter: (params: unknown) => {
-            const p = params as { value: number }
-            return p.value.toFixed(3)
-          },
+          color: isDark.value ? '#b0b3d0' : '#4a4d6a',
+          fontSize: 10,
+          formatter: (params: any) => params.value.toFixed(3),
         },
       },
     ],

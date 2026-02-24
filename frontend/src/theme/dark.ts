@@ -3,48 +3,48 @@ import type { EChartsOption } from 'echarts'
 const darkTheme: EChartsOption = {
   backgroundColor: 'transparent',
   textStyle: {
-    color: '#e6edf3',
+    color: '#f1f1f8',
   },
   title: {
     textStyle: {
-      color: '#e6edf3',
+      color: '#f1f1f8',
     },
   },
   legend: {
     textStyle: {
-      color: '#8b949e',
+      color: '#b0b3d0',
     },
   },
   tooltip: {
-    backgroundColor: '#1c2128',
-    borderColor: '#30363d',
+    backgroundColor: 'rgba(8, 11, 26, 0.9)',
+    borderColor: 'rgba(139, 92, 246, 0.2)',
     textStyle: {
-      color: '#e6edf3',
+      color: '#f1f1f8',
     },
   },
   xAxis: {
-    axisLine: { lineStyle: { color: '#30363d' } },
-    axisTick: { lineStyle: { color: '#30363d' } },
-    axisLabel: { color: '#8b949e' },
-    splitLine: { lineStyle: { color: '#21262d' } },
+    axisLine: { lineStyle: { color: 'rgba(139, 92, 246, 0.15)' } },
+    axisTick: { lineStyle: { color: 'rgba(139, 92, 246, 0.15)' } },
+    axisLabel: { color: '#b0b3d0' },
+    splitLine: { lineStyle: { color: 'rgba(139, 92, 246, 0.08)' } },
   },
   yAxis: {
-    axisLine: { lineStyle: { color: '#30363d' } },
-    axisTick: { lineStyle: { color: '#30363d' } },
-    axisLabel: { color: '#8b949e' },
-    splitLine: { lineStyle: { color: '#21262d' } },
+    axisLine: { lineStyle: { color: 'rgba(139, 92, 246, 0.15)' } },
+    axisTick: { lineStyle: { color: 'rgba(139, 92, 246, 0.15)' } },
+    axisLabel: { color: '#b0b3d0' },
+    splitLine: { lineStyle: { color: 'rgba(139, 92, 246, 0.08)' } },
   },
   categoryAxis: {
-    axisLine: { lineStyle: { color: '#30363d' } },
-    axisTick: { lineStyle: { color: '#30363d' } },
-    axisLabel: { color: '#8b949e' },
-    splitLine: { lineStyle: { color: '#21262d' } },
+    axisLine: { lineStyle: { color: 'rgba(139, 92, 246, 0.15)' } },
+    axisTick: { lineStyle: { color: 'rgba(139, 92, 246, 0.15)' } },
+    axisLabel: { color: '#b0b3d0' },
+    splitLine: { lineStyle: { color: 'rgba(139, 92, 246, 0.08)' } },
   },
   valueAxis: {
-    axisLine: { lineStyle: { color: '#30363d' } },
-    axisTick: { lineStyle: { color: '#30363d' } },
-    axisLabel: { color: '#8b949e' },
-    splitLine: { lineStyle: { color: '#21262d' } },
+    axisLine: { lineStyle: { color: 'rgba(139, 92, 246, 0.15)' } },
+    axisTick: { lineStyle: { color: 'rgba(139, 92, 246, 0.15)' } },
+    axisLabel: { color: '#b0b3d0' },
+    splitLine: { lineStyle: { color: 'rgba(139, 92, 246, 0.08)' } },
   },
 }
 

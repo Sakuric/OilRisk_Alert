@@ -112,12 +112,12 @@ function getChartOption(): echarts.EChartsOption {
     backgroundColor: 'transparent',
     tooltip: {
       trigger: 'axis',
-      backgroundColor: isDark.value ? '#1c2128' : '#fff',
-      borderColor: isDark.value ? '#30363d' : '#d0d7de',
-      textStyle: { color: isDark.value ? '#e6edf3' : '#24292f' },
+      backgroundColor: isDark.value ? 'rgba(8, 11, 26, 0.9)' : 'rgba(255, 255, 255, 0.95)',
+      borderColor: isDark.value ? 'rgba(139, 92, 246, 0.2)' : 'rgba(0, 0, 0, 0.1)',
+      textStyle: { color: isDark.value ? '#f1f1f8' : '#1a1a2e' },
     },
     legend: {
-      textStyle: { color: isDark.value ? '#8b949e' : '#57606a' },
+      textStyle: { color: isDark.value ? '#b0b3d0' : '#4a4d6a' },
       top: 0,
     },
     grid: {
@@ -130,14 +130,14 @@ function getChartOption(): echarts.EChartsOption {
       type: 'category',
       data: firstResult.dates,
       boundaryGap: false,
-      axisLine: { lineStyle: { color: isDark.value ? '#30363d' : '#d0d7de' } },
-      axisLabel: { color: isDark.value ? '#8b949e' : '#57606a' },
+      axisLine: { lineStyle: { color: isDark.value ? 'rgba(139, 92, 246, 0.15)' : '#e2e4ef' } },
+      axisLabel: { color: isDark.value ? '#b0b3d0' : '#4a4d6a' },
     },
     yAxis: {
       type: 'value',
-      axisLine: { lineStyle: { color: isDark.value ? '#30363d' : '#d0d7de' } },
-      axisLabel: { color: isDark.value ? '#8b949e' : '#57606a' },
-      splitLine: { lineStyle: { color: isDark.value ? '#21262d' : '#eaeef2' } },
+      axisLine: { lineStyle: { color: isDark.value ? 'rgba(139, 92, 246, 0.15)' : '#e2e4ef' } },
+      axisLabel: { color: isDark.value ? '#b0b3d0' : '#4a4d6a' },
+      splitLine: { lineStyle: { color: isDark.value ? 'rgba(139, 92, 246, 0.08)' : '#eff0f7' } },
     },
     series,
     animationDuration: 600,
@@ -340,7 +340,7 @@ onUnmounted(() => {
 }
 
 .backtest__tab.active {
-  border-color: var(--accent-blue, #58a6ff);
+  border-color: var(--accent-primary, #8b5cf6);
   color: var(--text-primary);
   background: rgba(88, 166, 255, 0.1);
 }
@@ -353,10 +353,10 @@ onUnmounted(() => {
 
 .backtest__run-btn {
   padding: 8px 24px;
-  border: 1px solid var(--accent-blue, #58a6ff);
+  border: 1px solid var(--accent-primary, #8b5cf6);
   border-radius: 6px;
   background: rgba(88, 166, 255, 0.1);
-  color: var(--accent-blue, #58a6ff);
+  color: var(--accent-primary, #8b5cf6);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;

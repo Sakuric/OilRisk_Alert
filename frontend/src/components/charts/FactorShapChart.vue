@@ -32,7 +32,7 @@ function getOption(): echarts.EChartsOption {
       trigger: 'axis',
       axisPointer: { type: 'shadow' },
       backgroundColor: isDark.value ? '#1c2128' : '#fff',
-      borderColor: isDark.value ? '#30363d' : '#d0d7de',
+      borderColor: isDark.value ? 'rgba(139, 92, 246, 0.15)' : '#e2e4ef',
       textStyle: { color: isDark.value ? '#e6edf3' : '#24292f' },
     },
     grid: {
@@ -44,16 +44,16 @@ function getOption(): echarts.EChartsOption {
     xAxis: {
       type: 'value',
       name: 'SHAP',
-      axisLine: { lineStyle: { color: isDark.value ? '#30363d' : '#d0d7de' } },
-      axisLabel: { color: isDark.value ? '#8b949e' : '#57606a' },
-      splitLine: { lineStyle: { color: isDark.value ? '#21262d' : '#eaeef2' } },
+      axisLine: { lineStyle: { color: isDark.value ? 'rgba(139, 92, 246, 0.15)' : '#e2e4ef' } },
+      axisLabel: { color: isDark.value ? '#b0b3d0' : '#4a4d6a' },
+      splitLine: { lineStyle: { color: isDark.value ? 'rgba(139, 92, 246, 0.08)' : '#eff0f7' } },
     },
     yAxis: {
       type: 'category',
       data: names,
-      axisLine: { lineStyle: { color: isDark.value ? '#30363d' : '#d0d7de' } },
+      axisLine: { lineStyle: { color: isDark.value ? 'rgba(139, 92, 246, 0.15)' : '#e2e4ef' } },
       axisLabel: {
-        color: isDark.value ? '#8b949e' : '#57606a',
+        color: isDark.value ? '#b0b3d0' : '#4a4d6a',
         fontSize: 12,
       },
     },

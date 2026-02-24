@@ -23,90 +23,82 @@ const { echartsThemeConfig, isDark } = useTheme()
 const { t } = useI18n()
 
 function getAlertColor(level: string): string {
-  if (level === 'Low') return '#3fb950'
-  if (level === 'Medium') return '#d29922'
-  return '#f85149'
+  if (level === 'Low') return '#34d399'
+  if (level === 'Medium') return '#fbbf24'
+  return '#f43f5e'
 }
 
 function getOption(): echarts.EChartsOption {
-  const themeOpts = echartsThemeConfig.value
+  const dark = isDark.value
   const alertData = props.alerts.map((a) => {
-    const idx = props.dates.indexOf(a.date)
     return {
       value: [a.date, a.riskIndex],
-      itemStyle: { color: getAlertColor(a.level) },
+      itemStyle: {
+        color: getAlertColor(a.level),
+        shadowBlur: 10,
+        shadowColor: getAlertColor(a.level)
+      },
       _level: a.level,
-      _dateIdx: idx,
     }
   })
 
+  const textColor = dark ? '#b0b3d0' : '#4a4d6a'
+  const gridColor = dark ? 'rgba(139, 92, 246, 0.08)' : 'rgba(0, 0, 0, 0.06)'
+  const axisLineColor = dark ? 'rgba(139, 92, 246, 0.15)' : 'rgba(0, 0, 0, 0.08)'
+
   return {
-    ...themeOpts,
-    animationDuration: 800,
-    animationEasing: 'cubicOut',
+    backgroundColor: 'transparent',
+    animationDuration: 1000,
     tooltip: {
-      ...themeOpts.tooltip,
       trigger: 'axis',
-      axisPointer: { type: 'cross' },
+      axisPointer: {
+        type: 'line',
+        lineStyle: { color: dark ? 'rgba(139, 92, 246, 0.3)' : 'rgba(0, 0, 0, 0.15)', type: 'dashed' }
+      },
+      backgroundColor: dark ? 'rgba(8, 11, 26, 0.9)' : 'rgba(255, 255, 255, 0.95)',
+      borderColor: dark ? 'rgba(139, 92, 246, 0.2)' : 'rgba(0, 0, 0, 0.1)',
+      textStyle: { color: dark ? '#f1f1f8' : '#1a1a2e' }
     },
     legend: {
-      ...themeOpts.legend,
       data: [
         t('overview.priceChart.oilPrice'),
-        t('overview.priceChart.riskIndex'),
-        t('overview.priceChart.alert'),
+        t('overview.priceChart.riskIndex')
       ],
+      textStyle: { color: textColor, fontSize: 12 },
       top: 0,
     },
     grid: {
-      left: 60,
-      right: 60,
-      top: 40,
+      left: '3%',
+      right: '3%',
+      top: 50,
       bottom: 60,
+      containLabel: true
     },
     xAxis: {
       type: 'category',
       data: props.dates,
-      ...(themeOpts.xAxis as Record<string, unknown>),
+      axisLine: { lineStyle: { color: axisLineColor } },
+      axisLabel: { color: textColor, fontSize: 11 },
       boundaryGap: false,
     },
     yAxis: [
       {
         type: 'value',
-        name: t('overview.priceChart.oilPrice'),
+        name: 'WTI ($)',
         position: 'left',
-        ...(themeOpts.yAxis as Record<string, unknown>),
+        splitLine: { lineStyle: { color: gridColor } },
+        axisLabel: { color: textColor },
+        nameTextStyle: { color: textColor }
       },
       {
         type: 'value',
-        name: t('overview.priceChart.riskIndex'),
+        name: 'Risk',
         position: 'right',
         min: 0,
         max: 100,
-        ...(themeOpts.yAxis as Record<string, unknown>),
-      },
-    ],
-    dataZoom: [
-      {
-        type: 'inside',
-        start: 0,
-        end: 100,
-      },
-      {
-        type: 'slider',
-        start: 0,
-        end: 100,
-        height: 20,
-        bottom: 8,
-        borderColor: isDark.value ? '#30363d' : '#d0d7de',
-        backgroundColor: isDark.value ? '#0d1117' : '#f6f8fa',
-        fillerColor: isDark.value ? 'rgba(88,166,255,0.2)' : 'rgba(9,105,218,0.2)',
-        handleStyle: {
-          color: isDark.value ? '#58a6ff' : '#0969da',
-        },
-        textStyle: {
-          color: isDark.value ? '#8b949e' : '#57606a',
-        },
+        splitLine: { show: false },
+        axisLabel: { color: textColor },
+        nameTextStyle: { color: textColor }
       },
     ],
     series: [
@@ -117,8 +109,13 @@ function getOption(): echarts.EChartsOption {
         data: props.oilPrice,
         smooth: true,
         symbol: 'none',
-        lineStyle: { width: 2, color: '#58a6ff' },
-        itemStyle: { color: '#58a6ff' },
+        lineStyle: { width: 3, color: '#8b5cf6' },
+        areaStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: 'rgba(139, 92, 246, 0.25)' },
+            { offset: 1, color: 'rgba(139, 92, 246, 0)' }
+          ])
+        }
       },
       {
         name: t('overview.priceChart.riskIndex'),
@@ -127,15 +124,20 @@ function getOption(): echarts.EChartsOption {
         data: props.riskIndex,
         smooth: true,
         symbol: 'none',
-        lineStyle: { width: 2, color: '#d29922' },
-        itemStyle: { color: '#d29922' },
+        lineStyle: { width: 2, color: '#fbbf24', type: 'dashed' },
+        areaStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: 'rgba(251, 191, 36, 0.12)' },
+            { offset: 1, color: 'rgba(251, 191, 36, 0)' }
+          ])
+        }
       },
       {
         name: t('overview.priceChart.alert'),
         type: 'scatter',
         yAxisIndex: 1,
         data: alertData,
-        symbolSize: 12,
+        symbolSize: 10,
         z: 10,
       },
     ],

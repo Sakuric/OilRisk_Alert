@@ -1,35 +1,85 @@
 :root[data-theme="dark"] {
-  --bg-primary: #0d1117;
-  --bg-secondary: #161b22;
-  --bg-card: #1c2128;
-  --text-primary: #e6edf3;
-  --text-secondary: #8b949e;
-  --border-color: #30363d;
-  --accent-blue: #58a6ff;
-  --risk-low: #3fb950;
-  --risk-medium: #d29922;
-  --risk-high: #f85149;
-  --chart-bg: #161b22;
-  --sidebar-bg: #0d1117;
-  --topbar-bg: #161b22;
-  --hover-bg: #1c2128;
-  --badge-bg: #21262d;
+  /* Background layers */
+  --bg-primary: #080b1a;
+  --bg-secondary: #0e1225;
+  --bg-card: rgba(16, 20, 45, 0.85);
+  --bg-card-hover: rgba(22, 27, 60, 0.9);
+  --bg-card-border: rgba(124, 58, 237, 0.15);
+
+  /* Text - high contrast */
+  --text-primary: #f1f1f8;
+  --text-secondary: #b0b3d0;
+  --text-muted: #6b6f8d;
+
+  /* Borders */
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-subtle: rgba(255, 255, 255, 0.04);
+
+  /* Accent colors */
+  --accent-primary: #8b5cf6;
+  --accent-primary-dim: rgba(139, 92, 246, 0.15);
+  --accent-blue: #6366f1;
+  --accent-cyan: #22d3ee;
+
+  /* Risk levels */
+  --risk-low: #34d399;
+  --risk-medium: #fbbf24;
+  --risk-high: #f43f5e;
+
+  /* Chart */
+  --chart-bg: transparent;
+  --chart-line-primary: #8b5cf6;
+  --chart-line-secondary: #fbbf24;
+  --chart-grid: rgba(255, 255, 255, 0.05);
+  --chart-text: #b0b3d0;
+
+  /* Layout */
+  --sidebar-bg: #0a0e20;
+  --topbar-bg: rgba(10, 14, 32, 0.9);
+  --hover-bg: rgba(139, 92, 246, 0.08);
+  --badge-bg: rgba(139, 92, 246, 0.12);
+
+  /* Glass morphism */
+  --glass-border: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(255, 255, 255, 0.02) 100%);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --glass-blur: blur(16px);
 }
 
 :root[data-theme="light"] {
-  --bg-primary: #ffffff;
-  --bg-secondary: #f6f8fa;
+  --bg-primary: #f8f9fc;
+  --bg-secondary: #eef0f6;
   --bg-card: #ffffff;
-  --text-primary: #24292f;
-  --text-secondary: #57606a;
-  --border-color: #d0d7de;
-  --accent-blue: #0969da;
-  --risk-low: #1a7f37;
-  --risk-medium: #bf8700;
-  --risk-high: #cf222e;
+  --bg-card-hover: #f5f6fa;
+  --bg-card-border: rgba(99, 102, 241, 0.12);
+
+  --text-primary: #1a1a2e;
+  --text-secondary: #4a4d6a;
+  --text-muted: #8b8ea8;
+
+  --border-color: #e2e4ef;
+  --border-subtle: #eff0f7;
+
+  --accent-primary: #7c3aed;
+  --accent-primary-dim: rgba(124, 58, 237, 0.1);
+  --accent-blue: #6366f1;
+  --accent-cyan: #0891b2;
+
+  --risk-low: #059669;
+  --risk-medium: #d97706;
+  --risk-high: #e11d48;
+
   --chart-bg: #ffffff;
-  --sidebar-bg: #f6f8fa;
+  --chart-line-primary: #7c3aed;
+  --chart-line-secondary: #d97706;
+  --chart-grid: rgba(0, 0, 0, 0.06);
+  --chart-text: #4a4d6a;
+
+  --sidebar-bg: #ffffff;
   --topbar-bg: #ffffff;
-  --hover-bg: #eaeef2;
-  --badge-bg: #eaeef2;
+  --hover-bg: rgba(124, 58, 237, 0.06);
+  --badge-bg: #eef0f6;
+
+  --glass-border: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(0, 0, 0, 0.01) 100%);
+  --glass-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  --glass-blur: blur(8px);
 }

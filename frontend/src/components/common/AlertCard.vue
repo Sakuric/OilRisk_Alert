@@ -54,10 +54,12 @@ const factorName = computed(() =>
 <style scoped>
 .alert-card {
   display: flex;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border: 1px solid var(--bg-card-border);
+  border-radius: 10px;
   overflow: hidden;
   background: var(--bg-card);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   transition: background-color 0.3s, border-color 0.3s;
 }
 
@@ -111,6 +113,7 @@ const factorName = computed(() =>
   padding: 1px 6px;
   border-radius: 4px;
   font-size: 11px;
+  color: var(--text-secondary);
 }
 
 .alert-card__summary {

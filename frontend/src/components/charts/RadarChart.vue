@@ -17,8 +17,9 @@ const categoryKeys = ['Supply-Demand', 'Macro', 'Financial', 'Geopolitical', 'Se
 
 function getOption(): echarts.EChartsOption {
   const isDark = props.theme === 'dark'
-  const axisColor = isDark ? '#444' : '#ddd'
-  const textColor = isDark ? '#ccc' : '#333'
+  const accentColor = '#8b5cf6'
+  const axisColor = isDark ? 'rgba(139, 92, 246, 0.15)' : 'rgba(0, 0, 0, 0.08)'
+  const textColor = isDark ? '#b0b3d0' : '#4a4d6a'
 
   const labels = categoryKeys.map((key) => t(`factor.category.${key}`))
   const values = categoryKeys.map((key) => {
@@ -32,9 +33,9 @@ function getOption(): echarts.EChartsOption {
     backgroundColor: 'transparent',
     tooltip: {
       trigger: 'item',
-      backgroundColor: isDark ? '#1c2128' : '#fff',
-      borderColor: isDark ? '#30363d' : '#d0d7de',
-      textStyle: { color: isDark ? '#e6edf3' : '#24292f' },
+      backgroundColor: isDark ? 'rgba(8, 11, 26, 0.9)' : 'rgba(255, 255, 255, 0.95)',
+      borderColor: isDark ? 'rgba(139, 92, 246, 0.2)' : 'rgba(0, 0, 0, 0.1)',
+      textStyle: { color: isDark ? '#f1f1f8' : '#1a1a2e' },
     },
     radar: {
       indicator: labels.map((name) => ({ name, max: 100 })),
@@ -43,8 +44,11 @@ function getOption(): echarts.EChartsOption {
       splitArea: { show: false },
       axisName: {
         color: textColor,
-        fontSize: 13,
+        fontSize: 11,
+        fontWeight: 'bold'
       },
+      center: ['50%', '50%'],
+      radius: '65%'
     },
     series: [
       {
@@ -54,20 +58,22 @@ function getOption(): echarts.EChartsOption {
             value: values,
             name: t('factorAnalysis.radarTitle'),
             areaStyle: {
-              color: isDark
-                ? 'rgba(88,166,255,0.25)'
-                : 'rgba(9,105,218,0.2)',
+              color: 'rgba(139, 92, 246, 0.2)',
             },
             lineStyle: {
-              color: isDark ? '#58a6ff' : '#0969da',
+              color: accentColor,
               width: 2,
+              shadowBlur: 10,
+              shadowColor: accentColor
             },
             itemStyle: {
-              color: isDark ? '#58a6ff' : '#0969da',
+              color: accentColor,
             },
+            symbol: 'circle',
+            symbolSize: 4
           },
         ],
-        animationDuration: 600,
+        animationDuration: 1000,
       },
     ],
   }

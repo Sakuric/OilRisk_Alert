@@ -8,14 +8,14 @@
     </select>
 
     <select id="findByDate" resultType="com.example.oilrisk_alert.entity.RiskFactor">
-        SELECT id, date, factor_name, factor_name_zh, category, "value", shap_value, created_at
+        SELECT id, date, factor_name, factor_name_zh, category, `value`, shap_value, created_at
         FROM risk_factor
         WHERE date = #{param1}
         ORDER BY ABS(shap_value) DESC
     </select>
 
     <select id="findTopByDateOrderByAbsShap" resultType="com.example.oilrisk_alert.entity.RiskFactor">
-        SELECT id, date, factor_name, factor_name_zh, category, "value", shap_value, created_at
+        SELECT id, date, factor_name, factor_name_zh, category, `value`, shap_value, created_at
         FROM risk_factor
         WHERE date = #{param1}
         ORDER BY ABS(shap_value) DESC

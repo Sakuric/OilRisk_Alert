@@ -304,8 +304,12 @@ onUnmounted(() => {
 
 .alert-records__filter-btn.active,
 .alert-records__filter-btn:hover {
-  border-color: var(--accent-blue, #58a6ff);
+  border-color: var(--accent-primary);
   color: var(--text-primary);
+}
+
+.alert-records__filter-btn.active {
+  background: var(--accent-primary-dim);
 }
 
 .alert-records__loading {
@@ -316,6 +320,11 @@ onUnmounted(() => {
 
 .alert-records__table-wrap {
   overflow-x: auto;
+  background: var(--bg-card);
+  border: 1px solid var(--bg-card-border);
+  border-radius: 16px;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 
 .alert-records__table {
@@ -326,16 +335,19 @@ onUnmounted(() => {
 
 .alert-records__table th {
   text-align: left;
-  padding: 10px 12px;
-  border-bottom: 2px solid var(--border-color);
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-color);
   color: var(--text-secondary);
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   white-space: nowrap;
 }
 
 .alert-records__table td {
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--border-color);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-subtle);
   color: var(--text-primary);
 }
 
@@ -345,11 +357,11 @@ onUnmounted(() => {
 }
 
 .alert-records__row:hover {
-  background: rgba(88, 166, 255, 0.05);
+  background: var(--hover-bg);
 }
 
 .alert-records__row--expanded {
-  background: rgba(88, 166, 255, 0.08);
+  background: var(--accent-primary-dim);
 }
 
 .alert-records__summary {
@@ -368,18 +380,18 @@ onUnmounted(() => {
 }
 
 .level--high {
-  background: rgba(248, 81, 73, 0.15);
-  color: #f85149;
+  background: rgba(244, 63, 94, 0.15);
+  color: #f43f5e;
 }
 
 .level--medium {
-  background: rgba(210, 153, 34, 0.15);
-  color: #d29922;
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
 }
 
 .level--low {
-  background: rgba(63, 185, 80, 0.15);
-  color: #3fb950;
+  background: rgba(52, 211, 153, 0.15);
+  color: #34d399;
 }
 
 .alert-records__detail-row td {
@@ -388,8 +400,8 @@ onUnmounted(() => {
 
 .alert-records__detail {
   padding: 16px 20px;
-  background: rgba(88, 166, 255, 0.03);
-  border-bottom: 2px solid var(--border-color);
+  background: var(--hover-bg);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .alert-records__detail-loading {
@@ -418,7 +430,7 @@ onUnmounted(() => {
   gap: 10px;
   font-size: 13px;
   padding: 6px 0;
-  border-left: 3px solid var(--border-color);
+  border-left: 3px solid var(--accent-primary);
   padding-left: 12px;
 }
 
@@ -432,18 +444,18 @@ onUnmounted(() => {
 }
 
 .badge--threshold {
-  background: rgba(210, 153, 34, 0.15);
-  color: #d29922;
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
 }
 
 .badge--trend {
-  background: rgba(88, 166, 255, 0.15);
-  color: #58a6ff;
+  background: rgba(139, 92, 246, 0.15);
+  color: #8b5cf6;
 }
 
 .badge--anomaly {
-  background: rgba(248, 81, 73, 0.15);
-  color: #f85149;
+  background: rgba(244, 63, 94, 0.15);
+  color: #f43f5e;
 }
 
 .alert-records__rule-factor {
@@ -482,8 +494,9 @@ onUnmounted(() => {
 }
 
 .alert-records__ai-btn:hover {
-  border-color: var(--accent-blue, #58a6ff);
+  border-color: var(--accent-primary);
   color: var(--text-primary);
+  background: var(--accent-primary-dim);
 }
 
 .alert-records__ai-btn--cancel {
@@ -501,7 +514,7 @@ onUnmounted(() => {
   width: 16px;
   height: 16px;
   border: 2px solid var(--border-color);
-  border-top-color: var(--accent-blue, #58a6ff);
+  border-top-color: var(--accent-primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -513,7 +526,7 @@ onUnmounted(() => {
 .alert-records__ai-error {
   width: 100%;
   padding: 8px 12px;
-  background: rgba(248, 81, 73, 0.1);
+  background: rgba(244, 63, 94, 0.1);
   border: 1px solid var(--risk-high);
   border-radius: 6px;
   color: var(--risk-high);
@@ -524,8 +537,8 @@ onUnmounted(() => {
   width: 100%;
   padding: 12px;
   background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border: 1px solid var(--bg-card-border);
+  border-radius: 8px;
   font-size: 13px;
   line-height: 1.6;
   color: var(--text-primary);
@@ -548,6 +561,12 @@ onUnmounted(() => {
   color: var(--text-secondary);
   font-size: 14px;
   cursor: pointer;
+  transition: all 0.2s;
+}
+
+.alert-records__page-btn:hover {
+  border-color: var(--accent-primary);
+  color: var(--text-primary);
 }
 
 .alert-records__page-btn:disabled {

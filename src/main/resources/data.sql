@@ -148,7 +148,7 @@ INSERT INTO risk_index (date, risk_index, risk_level, oil_price) VALUES
 ('2025-12-01', 60.64, 'Medium', 61.55);
 
 -- risk_factor data
-INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", shap_value) VALUES
+INSERT INTO risk_factor (`date`, factor_name, factor_name_zh, category, `value`, shap_value) VALUES
 ('2015-01-01', 'crude_inventory', '原油库存变化', 'SUPPLY_DEMAND', 0.0000, 0.000780),
 ('2015-01-01', 'opec_output', 'OPEC产量', 'SUPPLY_DEMAND', 29816.4412, -0.001466),
 ('2015-01-01', 'us_dollar_index', '美元指数', 'MACRO', 92.8731, 0.013559),
@@ -200,7 +200,7 @@ INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", s
 ('2015-05-01', 'gpr_index', '地缘政治风险指数', 'SENTIMENT', 76.2623, -0.031107),
 ('2015-05-01', 'news_sentiment', '新闻情绪指数', 'SENTIMENT', -0.0505, 0.010717);
 
-INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", shap_value) VALUES
+INSERT INTO risk_factor (`date`, factor_name, factor_name_zh, category, `value`, shap_value) VALUES
 ('2015-06-01', 'crude_inventory', '原油库存变化', 'SUPPLY_DEMAND', -5.0505, 0.018852),
 ('2015-06-01', 'opec_output', 'OPEC产量', 'SUPPLY_DEMAND', 31312.1012, -0.015926),
 ('2015-06-01', 'us_dollar_index', '美元指数', 'MACRO', 95.1957, 0.007777),
@@ -252,7 +252,7 @@ INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", s
 ('2015-10-01', 'gpr_index', '地缘政治风险指数', 'SENTIMENT', 91.9319, -0.017022),
 ('2015-10-01', 'news_sentiment', '新闻情绪指数', 'SENTIMENT', -0.1347, 0.030405);
 
-INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", shap_value) VALUES
+INSERT INTO risk_factor (`date`, factor_name, factor_name_zh, category, `value`, shap_value) VALUES
 ('2015-11-01', 'crude_inventory', '原油库存变化', 'SUPPLY_DEMAND', 5.5165, -0.018960),
 ('2015-11-01', 'opec_output', 'OPEC产量', 'SUPPLY_DEMAND', 31398.2352, -0.016758),
 ('2015-11-01', 'us_dollar_index', '美元指数', 'MACRO', 99.1050, -0.001955),
@@ -304,7 +304,7 @@ INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", s
 ('2016-03-01', 'gpr_index', '地缘政治风险指数', 'SENTIMENT', 109.7203, -0.001032),
 ('2016-03-01', 'news_sentiment', '新闻情绪指数', 'SENTIMENT', 0.2393, -0.057062);
 
-INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", shap_value) VALUES
+INSERT INTO risk_factor (`date`, factor_name, factor_name_zh, category, `value`, shap_value) VALUES
 ('2016-04-01', 'crude_inventory', '原油库存变化', 'SUPPLY_DEMAND', -1.8731, 0.007482),
 ('2016-04-01', 'opec_output', 'OPEC产量', 'SUPPLY_DEMAND', 31612.3890, -0.018829),
 ('2016-04-01', 'us_dollar_index', '美元指数', 'MACRO', 94.4282, 0.009688),
@@ -356,7 +356,7 @@ INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", s
 ('2016-08-01', 'gpr_index', '地缘政治风险指数', 'SENTIMENT', 98.7385, -0.010903),
 ('2016-08-01', 'news_sentiment', '新闻情绪指数', 'SENTIMENT', 0.0835, -0.020614);
 
-INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", shap_value) VALUES
+INSERT INTO risk_factor (`date`, factor_name, factor_name_zh, category, `value`, shap_value) VALUES
 ('2016-09-01', 'crude_inventory', '原油库存变化', 'SUPPLY_DEMAND', -3.0124, 0.011559),
 ('2016-09-01', 'opec_output', 'OPEC产量', 'SUPPLY_DEMAND', 32054.8290, -0.023106),
 ('2016-09-01', 'us_dollar_index', '美元指数', 'MACRO', 95.5253, 0.006956),
@@ -408,7 +408,7 @@ INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", s
 ('2017-01-01', 'gpr_index', '地缘政治风险指数', 'SENTIMENT', 105.2012, -0.005094),
 ('2017-01-01', 'news_sentiment', '新闻情绪指数', 'SENTIMENT', 0.0750, -0.018634);
 
-INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", shap_value) VALUES
+INSERT INTO risk_factor (`date`, factor_name, factor_name_zh, category, `value`, shap_value) VALUES
 ('2017-02-01', 'crude_inventory', '原油库存变化', 'SUPPLY_DEMAND', -2.7093, 0.010474),
 ('2017-02-01', 'opec_output', 'OPEC产量', 'SUPPLY_DEMAND', 31675.3176, -0.019437),
 ('2017-02-01', 'us_dollar_index', '美元指数', 'MACRO', 100.6783, -0.005872),
@@ -460,7 +460,7 @@ INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", s
 ('2017-06-01', 'gpr_index', '地缘政治风险指数', 'SENTIMENT', 126.7890, 0.014310),
 ('2017-06-01', 'news_sentiment', '新闻情绪指数', 'SENTIMENT', -0.0332, 0.006667);
 
-INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", shap_value) VALUES
+INSERT INTO risk_factor (`date`, factor_name, factor_name_zh, category, `value`, shap_value) VALUES
 ('2017-07-01', 'crude_inventory', '原油库存变化', 'SUPPLY_DEMAND', -7.4233, 0.027343),
 ('2017-07-01', 'opec_output', 'OPEC产量', 'SUPPLY_DEMAND', 32478.7292, -0.027204),
 ('2017-07-01', 'us_dollar_index', '美元指数', 'MACRO', 94.8928, 0.008531),
@@ -512,7 +512,7 @@ INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", s
 ('2017-11-01', 'gpr_index', '地缘政治风险指数', 'SENTIMENT', 92.5960, -0.016425),
 ('2017-11-01', 'news_sentiment', '新闻情绪指数', 'SENTIMENT', -0.1594, 0.036174);
 
-INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", shap_value) VALUES
+INSERT INTO risk_factor (`date`, factor_name, factor_name_zh, category, `value`, shap_value) VALUES
 ('2017-12-01', 'crude_inventory', '原油库存变化', 'SUPPLY_DEMAND', -14.9637, 0.054325),
 ('2017-12-01', 'opec_output', 'OPEC产量', 'SUPPLY_DEMAND', 31873.1116, -0.021349),
 ('2017-12-01', 'us_dollar_index', '美元指数', 'MACRO', 93.3429, 0.012390),
@@ -564,7 +564,7 @@ INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", s
 ('2018-04-01', 'gpr_index', '地缘政治风险指数', 'SENTIMENT', 123.2635, 0.011141),
 ('2018-04-01', 'news_sentiment', '新闻情绪指数', 'SENTIMENT', -0.2227, 0.050985);
 
-INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", shap_value) VALUES
+INSERT INTO risk_factor (`date`, factor_name, factor_name_zh, category, `value`, shap_value) VALUES
 ('2018-05-01', 'crude_inventory', '原油库存变化', 'SUPPLY_DEMAND', 2.9678, -0.009840),
 ('2018-05-01', 'opec_output', 'OPEC产量', 'SUPPLY_DEMAND', 31697.5321, -0.019652),
 ('2018-05-01', 'us_dollar_index', '美元指数', 'MACRO', 93.3489, 0.012375),
@@ -616,7 +616,7 @@ INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", s
 ('2018-09-01', 'gpr_index', '地缘政治风险指数', 'SENTIMENT', 75.0539, -0.032193),
 ('2018-09-01', 'news_sentiment', '新闻情绪指数', 'SENTIMENT', -0.0637, 0.013804);
 
-INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", shap_value) VALUES
+INSERT INTO risk_factor (`date`, factor_name, factor_name_zh, category, `value`, shap_value) VALUES
 ('2018-10-01', 'crude_inventory', '原油库存变化', 'SUPPLY_DEMAND', 22.1149, -0.078355),
 ('2018-10-01', 'opec_output', 'OPEC产量', 'SUPPLY_DEMAND', 32325.5243, -0.025723),
 ('2018-10-01', 'us_dollar_index', '美元指数', 'MACRO', 95.8441, 0.006163),
@@ -668,7 +668,7 @@ INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", s
 ('2019-02-01', 'gpr_index', '地缘政治风险指数', 'SENTIMENT', 96.8002, -0.012646),
 ('2019-02-01', 'news_sentiment', '新闻情绪指数', 'SENTIMENT', 0.0086, -0.003116);
 
-INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", shap_value) VALUES
+INSERT INTO risk_factor (`date`, factor_name, factor_name_zh, category, `value`, shap_value) VALUES
 ('2019-03-01', 'crude_inventory', '原油库存变化', 'SUPPLY_DEMAND', 6.7390, -0.023335),
 ('2019-03-01', 'opec_output', 'OPEC产量', 'SUPPLY_DEMAND', 30188.4232, -0.005062),
 ('2019-03-01', 'us_dollar_index', '美元指数', 'MACRO', 96.8036, 0.003774),
@@ -720,7 +720,7 @@ INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", s
 ('2019-07-01', 'gpr_index', '地缘政治风险指数', 'SENTIMENT', 93.5213, -0.015593),
 ('2019-07-01', 'news_sentiment', '新闻情绪指数', 'SENTIMENT', 0.0885, -0.021783);
 
-INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", shap_value) VALUES
+INSERT INTO risk_factor (`date`, factor_name, factor_name_zh, category, `value`, shap_value) VALUES
 ('2019-08-01', 'crude_inventory', '原油库存变化', 'SUPPLY_DEMAND', -14.1873, 0.051547),
 ('2019-08-01', 'opec_output', 'OPEC产量', 'SUPPLY_DEMAND', 29876.1595, -0.002043),
 ('2019-08-01', 'us_dollar_index', '美元指数', 'MACRO', 98.0050, 0.000783),
@@ -772,7 +772,7 @@ INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", s
 ('2019-12-01', 'gpr_index', '地缘政治风险指数', 'SENTIMENT', 74.2799, -0.032889),
 ('2019-12-01', 'news_sentiment', '新闻情绪指数', 'SENTIMENT', -0.0164, 0.002730);
 
-INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", shap_value) VALUES
+INSERT INTO risk_factor (`date`, factor_name, factor_name_zh, category, `value`, shap_value) VALUES
 ('2020-01-01', 'crude_inventory', '原油库存变化', 'SUPPLY_DEMAND', -10.3195, 0.037706),
 ('2020-01-01', 'opec_output', 'OPEC产量', 'SUPPLY_DEMAND', 29127.7735, 0.005192),
 ('2020-01-01', 'us_dollar_index', '美元指数', 'MACRO', 97.4176, 0.002245),
@@ -824,7 +824,7 @@ INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", s
 ('2020-05-01', 'gpr_index', '地缘政治风险指数', 'SENTIMENT', 68.5072, -0.038078),
 ('2020-05-01', 'news_sentiment', '新闻情绪指数', 'SENTIMENT', -0.2655, 0.060982);
 
-INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", shap_value) VALUES
+INSERT INTO risk_factor (`date`, factor_name, factor_name_zh, category, `value`, shap_value) VALUES
 ('2020-06-01', 'crude_inventory', '原油库存变化', 'SUPPLY_DEMAND', -18.9451, 0.068572),
 ('2020-06-01', 'opec_output', 'OPEC产量', 'SUPPLY_DEMAND', 22876.2189, 0.065629),
 ('2020-06-01', 'us_dollar_index', '美元指数', 'MACRO', 97.1519, 0.002907),
@@ -876,7 +876,7 @@ INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", s
 ('2020-10-01', 'gpr_index', '地缘政治风险指数', 'SENTIMENT', 76.0832, -0.031268),
 ('2020-10-01', 'news_sentiment', '新闻情绪指数', 'SENTIMENT', -0.6056, 0.140500);
 
-INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", shap_value) VALUES
+INSERT INTO risk_factor (`date`, factor_name, factor_name_zh, category, `value`, shap_value) VALUES
 ('2020-11-01', 'crude_inventory', '原油库存变化', 'SUPPLY_DEMAND', 2.4156, -0.007864),
 ('2020-11-01', 'opec_output', 'OPEC产量', 'SUPPLY_DEMAND', 25700.4328, 0.038326),
 ('2020-11-01', 'us_dollar_index', '美元指数', 'MACRO', 92.5724, 0.014308),
@@ -928,7 +928,7 @@ INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", s
 ('2021-03-01', 'gpr_index', '地缘政治风险指数', 'SENTIMENT', 78.6188, -0.028989),
 ('2021-03-01', 'news_sentiment', '新闻情绪指数', 'SENTIMENT', -0.0330, 0.006614);
 
-INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", shap_value) VALUES
+INSERT INTO risk_factor (`date`, factor_name, factor_name_zh, category, `value`, shap_value) VALUES
 ('2021-04-01', 'crude_inventory', '原油库存变化', 'SUPPLY_DEMAND', -3.2728, 0.012491),
 ('2021-04-01', 'opec_output', 'OPEC产量', 'SUPPLY_DEMAND', 25746.6405, 0.037879),
 ('2021-04-01', 'us_dollar_index', '美元指数', 'MACRO', 91.7042, 0.016469),
@@ -980,7 +980,7 @@ INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", s
 ('2021-08-01', 'gpr_index', '地缘政治风险指数', 'SENTIMENT', 89.4865, -0.019220),
 ('2021-08-01', 'news_sentiment', '新闻情绪指数', 'SENTIMENT', -0.1803, 0.041054);
 
-INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", shap_value) VALUES
+INSERT INTO risk_factor (`date`, factor_name, factor_name_zh, category, `value`, shap_value) VALUES
 ('2021-09-01', 'crude_inventory', '原油库存变化', 'SUPPLY_DEMAND', 1.9658, -0.006255),
 ('2021-09-01', 'opec_output', 'OPEC产量', 'SUPPLY_DEMAND', 27833.6054, 0.017703),
 ('2021-09-01', 'us_dollar_index', '美元指数', 'MACRO', 92.9355, 0.013404),
@@ -1032,7 +1032,7 @@ INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", s
 ('2022-01-01', 'gpr_index', '地缘政治风险指数', 'SENTIMENT', 138.6750, 0.024994),
 ('2022-01-01', 'news_sentiment', '新闻情绪指数', 'SENTIMENT', -0.0905, 0.020065);
 
-INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", shap_value) VALUES
+INSERT INTO risk_factor (`date`, factor_name, factor_name_zh, category, `value`, shap_value) VALUES
 ('2022-02-01', 'crude_inventory', '原油库存变化', 'SUPPLY_DEMAND', -23.3825, 0.084450),
 ('2022-02-01', 'opec_output', 'OPEC产量', 'SUPPLY_DEMAND', 29284.9699, 0.003672),
 ('2022-02-01', 'us_dollar_index', '美元指数', 'MACRO', 96.0145, 0.005738),
@@ -1084,7 +1084,7 @@ INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", s
 ('2022-06-01', 'gpr_index', '地缘政治风险指数', 'SENTIMENT', 130.7073, 0.017833),
 ('2022-06-01', 'news_sentiment', '新闻情绪指数', 'SENTIMENT', -0.0294, 0.005787);
 
-INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", shap_value) VALUES
+INSERT INTO risk_factor (`date`, factor_name, factor_name_zh, category, `value`, shap_value) VALUES
 ('2022-07-01', 'crude_inventory', '原油库存变化', 'SUPPLY_DEMAND', 0.0609, 0.000562),
 ('2022-07-01', 'opec_output', 'OPEC产量', 'SUPPLY_DEMAND', 29285.6465, 0.003665),
 ('2022-07-01', 'us_dollar_index', '美元指数', 'MACRO', 106.7827, -0.021069),
@@ -1136,7 +1136,7 @@ INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", s
 ('2022-11-01', 'gpr_index', '地缘政治风险指数', 'SENTIMENT', 116.7163, 0.005256),
 ('2022-11-01', 'news_sentiment', '新闻情绪指数', 'SENTIMENT', 0.1120, -0.027295);
 
-INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", shap_value) VALUES
+INSERT INTO risk_factor (`date`, factor_name, factor_name_zh, category, `value`, shap_value) VALUES
 ('2022-12-01', 'crude_inventory', '原油库存变化', 'SUPPLY_DEMAND', -4.3198, 0.016237),
 ('2022-12-01', 'opec_output', 'OPEC产量', 'SUPPLY_DEMAND', 29560.9882, 0.001003),
 ('2022-12-01', 'us_dollar_index', '美元指数', 'MACRO', 104.5087, -0.015408),
@@ -1188,7 +1188,7 @@ INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", s
 ('2023-04-01', 'gpr_index', '地缘政治风险指数', 'SENTIMENT', 106.8097, -0.003648),
 ('2023-04-01', 'news_sentiment', '新闻情绪指数', 'SENTIMENT', 0.1667, -0.040074);
 
-INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", shap_value) VALUES
+INSERT INTO risk_factor (`date`, factor_name, factor_name_zh, category, `value`, shap_value) VALUES
 ('2023-05-01', 'crude_inventory', '原油库存变化', 'SUPPLY_DEMAND', 7.4369, -0.025832),
 ('2023-05-01', 'opec_output', 'OPEC产量', 'SUPPLY_DEMAND', 28928.7088, 0.007116),
 ('2023-05-01', 'us_dollar_index', '美元指数', 'MACRO', 102.7895, -0.011128),
@@ -1240,7 +1240,7 @@ INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", s
 ('2023-09-01', 'gpr_index', '地缘政治风险指数', 'SENTIMENT', 98.6348, -0.010997),
 ('2023-09-01', 'news_sentiment', '新闻情绪指数', 'SENTIMENT', 0.2026, -0.048471);
 
-INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", shap_value) VALUES
+INSERT INTO risk_factor (`date`, factor_name, factor_name_zh, category, `value`, shap_value) VALUES
 ('2023-10-01', 'crude_inventory', '原油库存变化', 'SUPPLY_DEMAND', -11.0819, 0.040434),
 ('2023-10-01', 'opec_output', 'OPEC产量', 'SUPPLY_DEMAND', 28671.2502, 0.009605),
 ('2023-10-01', 'us_dollar_index', '美元指数', 'MACRO', 106.3619, -0.020021),
@@ -1292,7 +1292,7 @@ INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", s
 ('2024-02-01', 'gpr_index', '地缘政治风险指数', 'SENTIMENT', 146.5982, 0.032116),
 ('2024-02-01', 'news_sentiment', '新闻情绪指数', 'SENTIMENT', 0.2875, -0.068317);
 
-INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", shap_value) VALUES
+INSERT INTO risk_factor (`date`, factor_name, factor_name_zh, category, `value`, shap_value) VALUES
 ('2024-03-01', 'crude_inventory', '原油库存变化', 'SUPPLY_DEMAND', 9.7250, -0.034020),
 ('2024-03-01', 'opec_output', 'OPEC产量', 'SUPPLY_DEMAND', 29145.1682, 0.005023),
 ('2024-03-01', 'us_dollar_index', '美元指数', 'MACRO', 103.7090, -0.013417),
@@ -1344,7 +1344,7 @@ INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", s
 ('2024-07-01', 'gpr_index', '地缘政治风险指数', 'SENTIMENT', 92.3949, -0.016606),
 ('2024-07-01', 'news_sentiment', '新闻情绪指数', 'SENTIMENT', -0.0078, 0.000731);
 
-INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", shap_value) VALUES
+INSERT INTO risk_factor (`date`, factor_name, factor_name_zh, category, `value`, shap_value) VALUES
 ('2024-08-01', 'crude_inventory', '原油库存变化', 'SUPPLY_DEMAND', -10.9426, 0.039936),
 ('2024-08-01', 'opec_output', 'OPEC产量', 'SUPPLY_DEMAND', 28944.7220, 0.006961),
 ('2024-08-01', 'us_dollar_index', '美元指数', 'MACRO', 102.2394, -0.009758),
@@ -1396,7 +1396,7 @@ INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", s
 ('2024-12-01', 'gpr_index', '地缘政治风险指数', 'SENTIMENT', 142.3664, 0.028313),
 ('2024-12-01', 'news_sentiment', '新闻情绪指数', 'SENTIMENT', -0.0479, 0.010100);
 
-INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", shap_value) VALUES
+INSERT INTO risk_factor (`date`, factor_name, factor_name_zh, category, `value`, shap_value) VALUES
 ('2025-01-01', 'crude_inventory', '原油库存变化', 'SUPPLY_DEMAND', -9.8556, 0.036046),
 ('2025-01-01', 'opec_output', 'OPEC产量', 'SUPPLY_DEMAND', 28997.0003, 0.006456),
 ('2025-01-01', 'us_dollar_index', '美元指数', 'MACRO', 108.6552, -0.025730),
@@ -1448,7 +1448,7 @@ INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", s
 ('2025-05-01', 'gpr_index', '地缘政治风险指数', 'SENTIMENT', 165.7626, 0.049343),
 ('2025-05-01', 'news_sentiment', '新闻情绪指数', 'SENTIMENT', 0.0382, -0.010026);
 
-INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", shap_value) VALUES
+INSERT INTO risk_factor (`date`, factor_name, factor_name_zh, category, `value`, shap_value) VALUES
 ('2025-06-01', 'crude_inventory', '原油库存变化', 'SUPPLY_DEMAND', -5.1253, 0.019120),
 ('2025-06-01', 'opec_output', 'OPEC产量', 'SUPPLY_DEMAND', 29392.0745, 0.002636),
 ('2025-06-01', 'us_dollar_index', '美元指数', 'MACRO', 98.4145, -0.000236),
@@ -1500,7 +1500,7 @@ INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", s
 ('2025-10-01', 'gpr_index', '地缘政治风险指数', 'SENTIMENT', 154.4252, 0.039152),
 ('2025-10-01', 'news_sentiment', '新闻情绪指数', 'SENTIMENT', 0.1461, -0.035267);
 
-INSERT INTO risk_factor (date, factor_name, factor_name_zh, category, "value", shap_value) VALUES
+INSERT INTO risk_factor (`date`, factor_name, factor_name_zh, category, `value`, shap_value) VALUES
 ('2025-11-01', 'crude_inventory', '原油库存变化', 'SUPPLY_DEMAND', -0.5009, 0.002572),
 ('2025-11-01', 'opec_output', 'OPEC产量', 'SUPPLY_DEMAND', 29392.0745, 0.002636),
 ('2025-11-01', 'us_dollar_index', '美元指数', 'MACRO', 99.7016, -0.003441),

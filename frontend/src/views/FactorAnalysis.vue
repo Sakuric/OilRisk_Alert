@@ -283,7 +283,7 @@ onUnmounted(() => {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: var(--accent-blue, #58a6ff);
+  background: var(--accent-primary, #8b5cf6);
   cursor: pointer;
 }
 
@@ -314,7 +314,7 @@ onUnmounted(() => {
 
 .factor-analysis__reset-btn:hover {
   color: var(--text-primary);
-  border-color: var(--accent-blue, #58a6ff);
+  border-color: var(--accent-primary, #8b5cf6);
 }
 
 .factor-analysis__reset-btn:disabled {

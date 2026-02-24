@@ -16,63 +16,99 @@ const { echartsThemeConfig, isDark } = useTheme()
 const { t } = useI18n()
 
 const riskColor = computed(() => {
-  if (props.riskIndex < 40) return isDark.value ? '#3fb950' : '#1a7f37'
-  if (props.riskIndex < 70) return isDark.value ? '#d29922' : '#bf8700'
-  return isDark.value ? '#f85149' : '#cf222e'
+  if (props.riskIndex < 40) return '#34d399'
+  if (props.riskIndex < 70) return '#fbbf24'
+  return '#f43f5e'
 })
 
 function getOption(): echarts.EChartsOption {
   const themeOpts = echartsThemeConfig.value
   return {
-    ...themeOpts,
-    animationDuration: 800,
-    animationEasing: 'cubicOut',
+    backgroundColor: 'transparent',
+    animationDuration: 1500,
+    animationEasing: 'elasticOut',
     series: [
       {
         type: 'gauge',
-        startAngle: 220,
-        endAngle: -40,
+        startAngle: 210,
+        endAngle: -30,
         min: 0,
         max: 100,
-        radius: '90%',
+        splitNumber: 10,
+        radius: '100%',
         progress: {
           show: true,
-          width: 18,
+          width: 12,
           roundCap: true,
+          itemStyle: {
+            color: riskColor.value,
+            shadowBlur: 15,
+            shadowColor: riskColor.value,
+          },
+        },
+        pointer: {
+          show: true,
+          length: '60%',
+          width: 4,
           itemStyle: {
             color: riskColor.value,
           },
         },
-        pointer: { show: false },
         axisLine: {
           lineStyle: {
-            width: 18,
-            color: [[1, isDark.value ? '#21262d' : '#eaeef2']],
+            width: 12,
+            color: [[1, 'rgba(139, 92, 246, 0.1)']],
           },
           roundCap: true,
         },
         axisTick: { show: false },
-        splitLine: { show: false },
-        axisLabel: { show: false },
-        anchor: { show: false },
+        splitLine: {
+          show: true,
+          length: 4,
+          lineStyle: {
+            width: 2,
+            color: 'rgba(139, 92, 246, 0.2)',
+          },
+        },
+        axisLabel: {
+          show: true,
+          distance: 20,
+          color: 'var(--chart-text, rgba(176, 179, 208, 0.5))',
+          fontSize: 10,
+        },
+        anchor: {
+          show: true,
+          showAbove: true,
+          size: 15,
+          itemStyle: {
+            borderWidth: 3,
+            borderColor: riskColor.value,
+            color: '#080b1a',
+          },
+        },
         title: {
           show: true,
-          offsetCenter: [0, '65%'],
-          fontSize: 14,
-          color: isDark.value ? '#8b949e' : '#57606a',
+          offsetCenter: [0, '70%'],
+          fontSize: 12,
+          fontWeight: 'bold',
+          color: riskColor.value,
+          backgroundColor: 'rgba(255, 255, 255, 0.03)',
+          borderRadius: 4,
+          padding: [4, 8],
         },
         detail: {
           valueAnimation: true,
-          fontSize: 40,
-          fontWeight: 'bold',
-          offsetCenter: [0, '15%'],
-          color: riskColor.value,
+          fontSize: 36,
+          fontWeight: '800',
+          offsetCenter: [0, '25%'],
+          color: '#fff',
           formatter: '{value}',
+          fontFamily: 'Inter',
         },
         data: [
           {
             value: props.riskIndex,
-            name: t(`risk.level.${props.riskLevel}`),
+            name: t(`risk.level.${props.riskLevel}`).toUpperCase(),
           },
         ],
       },

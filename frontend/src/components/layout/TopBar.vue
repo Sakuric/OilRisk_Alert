@@ -34,11 +34,11 @@ function selectPreset(p: TimePreset) {
       </div>
     </div>
     <div class="topbar__right">
-      <button class="topbar__btn" @click="appStore.toggleLocale()" :title="isZh ? 'Switch to English' : '切换中文'">
-        {{ isZh ? 'EN' : '中' }}
+      <button class="topbar__btn" @click="appStore.toggleLocale()" :title="isZh ? 'Switch to English' : '\u5207\u6362\u4E2D\u6587'">
+        {{ isZh ? 'EN' : '\u4E2D' }}
       </button>
       <button class="topbar__btn" @click="appStore.toggleTheme()" :title="isDark ? t('topbar.themeLight') : t('topbar.themeDark')">
-        {{ isDark ? '☀️' : '🌙' }}
+        {{ isDark ? '\u2600\uFE0F' : '\uD83C\uDF19' }}
       </button>
     </div>
   </header>
@@ -54,6 +54,8 @@ function selectPreset(p: TimePreset) {
   background: var(--topbar-bg);
   border-bottom: 1px solid var(--border-color);
   flex-shrink: 0;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   transition: background-color 0.3s;
 }
 
@@ -86,13 +88,13 @@ function selectPreset(p: TimePreset) {
 
 .topbar__preset-btn:hover {
   color: var(--text-primary);
-  border-color: var(--accent-blue);
+  border-color: var(--accent-primary);
 }
 
 .topbar__preset-btn--active {
-  background: var(--accent-blue);
+  background: var(--accent-primary);
   color: #fff;
-  border-color: var(--accent-blue);
+  border-color: var(--accent-primary);
 }
 
 .topbar__right {
@@ -118,6 +120,6 @@ function selectPreset(p: TimePreset) {
 
 .topbar__btn:hover {
   background: var(--hover-bg);
-  border-color: var(--accent-blue);
+  border-color: var(--accent-primary);
 }
 </style>
