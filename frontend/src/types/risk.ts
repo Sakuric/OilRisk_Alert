@@ -5,11 +5,22 @@ export interface TopFactor {
   category: 'Supply-Demand' | 'Macro' | 'Financial' | 'Geopolitical' | 'Sentiment'
 }
 
+export interface ModelSignal {
+  lstmPredPrice: number
+  lstmDirection: string
+  lstmUpProb: number
+  xgbRiskScore: number
+  stackingReturnPct: number
+  stackingRiskZone: string
+  date: string
+}
+
 export interface CurrentRisk {
   riskIndex: number
   riskLevel: 'Low' | 'Medium' | 'High'
   date: string
   topFactors: TopFactor[]
+  modelSignal?: ModelSignal
 }
 
 export interface TimeseriesPoint {

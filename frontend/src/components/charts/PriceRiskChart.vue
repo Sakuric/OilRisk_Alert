@@ -19,7 +19,7 @@ const props = defineProps<{
 
 const chartRef = ref<HTMLDivElement>()
 let chart: echarts.ECharts | null = null
-const { echartsThemeConfig, isDark } = useTheme()
+const { isDark } = useTheme()
 const { t } = useI18n()
 
 function getAlertColor(level: string): string {

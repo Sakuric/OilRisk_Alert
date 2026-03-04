@@ -9,13 +9,13 @@ import type { BacktestParams, BacktestResult } from '@/types/backtest'
 const { t } = useI18n()
 const { isDark } = useTheme()
 
-type ModelName = 'XGBoost' | 'ARIMA' | 'LSTM'
+type ModelName = 'XGBoost' | 'LSTM' | 'Stacking'
 
-const models: ModelName[] = ['XGBoost', 'ARIMA', 'LSTM']
+const models: ModelName[] = ['XGBoost', 'LSTM', 'Stacking']
 const modelColors: Record<ModelName, string> = {
   XGBoost: '#d29922',
-  ARIMA: '#3fb950',
   LSTM: '#da3633',
+  Stacking: '#3fb950',
 }
 
 const today = new Date().toISOString().slice(0, 10)

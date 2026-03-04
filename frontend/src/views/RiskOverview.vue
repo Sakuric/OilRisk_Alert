@@ -8,24 +8,27 @@ import { useRiskStore } from '@/stores/risk'
 import { useTheme } from '@/composables/useTheme'
 import { getAlerts } from '@/api/alert'
 import { getRadarScores } from '@/api/factor'
+import { getModelSignals } from '@/api/risk'
 import RiskGauge from '@/components/charts/RiskGauge.vue'
 import PriceRiskChart from '@/components/charts/PriceRiskChart.vue'
 import FactorBarChart from '@/components/charts/FactorBarChart.vue'
 import RadarChart from '@/components/charts/RadarChart.vue'
 import AlertCard from '@/components/common/AlertCard.vue'
 import type { RadarScore } from '@/types/factor'
+import type { ModelSignal } from '@/types/risk'
 
 const { t } = useI18n()
 const riskStore = useRiskStore()
 const { isDark } = useTheme()
-const { data: riskData, loading: riskLoading, error: riskError } = useRisk()
-const { data: tsData, loading: tsLoading } = useTimeseries()
-const { data: alertsData, loading: alertsLoading } = useAlerts({ page: 1, size: 3 })
+const { data: riskData } = useRisk()
+const { data: tsData } = useTimeseries()
+const { data: alertsData } = useAlerts({ page: 1, size: 3 })
 
 const llmExpanded = ref(true)
 const aiSummaryText = ref('')
 const displayedAiSummary = ref('')
 const radarScores = ref<RadarScore[]>([])
+const modelSignal = ref<ModelSignal | null>(null)
 let typewriterTimer: any = null
 
 const riskIndex = computed(() => riskData.value?.riskIndex ?? 0)
@@ -36,8 +39,6 @@ const dates = computed(() => tsData.value?.dates ?? [])
 const oilPrice = computed(() => tsData.value?.oilPrice ?? [])
 const tsRiskIndex = computed(() => tsData.value?.riskIndex ?? [])
 const tsAlerts = computed(() => tsData.value?.alerts ?? [])
-
-const isLoading = computed(() => riskLoading.value || tsLoading.value || alertsLoading.value)
 
 function startTypewriter(text: string) {
   displayedAiSummary.value = ''
@@ -56,9 +57,10 @@ function startTypewriter(text: string) {
 
 async function fetchData() {
   try {
-    const [alertRes, radarRes] = await Promise.all([
+    const [alertRes, radarRes, signalRes] = await Promise.all([
       getAlerts({ page: 1, size: 1 }),
-      getRadarScores()
+      getRadarScores(),
+      getModelSignals().catch(() => null),
     ])
 
     const records = alertRes.data.data.records
@@ -68,6 +70,10 @@ async function fetchData() {
     }
 
     radarScores.value = radarRes.data.data
+
+    if (signalRes?.data?.data) {
+      modelSignal.value = signalRes.data.data
+    }
   } catch {
     // silent fail
   }
@@ -103,6 +109,33 @@ watch(aiSummaryText, (newVal) => {
           <h3 class="overview__card-title">{{ t('factorAnalysis.radarTitle') }}</h3>
           <div class="chart-container">
             <RadarChart :data="radarScores" :theme="isDark ? 'dark' : 'light'" />
+          </div>
+        </div>
+
+        <!-- Model Signals Panel -->
+        <div v-if="modelSignal" class="overview__card glass-card overview__signals">
+          <h3 class="overview__card-title">{{ t('overview.modelSignals.title') }}</h3>
+          <div class="overview__signal-grid">
+            <div class="overview__signal-item">
+              <span class="overview__signal-label">LSTM</span>
+              <span class="overview__signal-value">${{ modelSignal.lstmPredPrice.toFixed(2) }}</span>
+              <span class="overview__signal-direction" :class="modelSignal.lstmDirection === 'Up' ? 'signal--up' : 'signal--down'">
+                {{ t('overview.modelSignals.direction.' + modelSignal.lstmDirection) }}
+              </span>
+              <span class="overview__signal-sub">{{ t('overview.modelSignals.upProb') }}: {{ (modelSignal.lstmUpProb * 100).toFixed(1) }}%</span>
+            </div>
+            <div class="overview__signal-item">
+              <span class="overview__signal-label">XGBoost</span>
+              <span class="overview__signal-value">{{ (modelSignal.xgbRiskScore * 100).toFixed(1) }}%</span>
+              <span class="overview__signal-sub">{{ t('overview.modelSignals.impactProb') }}</span>
+            </div>
+            <div class="overview__signal-item">
+              <span class="overview__signal-label">Stacking</span>
+              <span class="overview__signal-value" :class="modelSignal.stackingReturnPct >= 0 ? 'signal--up' : 'signal--down'">
+                {{ modelSignal.stackingReturnPct >= 0 ? '+' : '' }}{{ modelSignal.stackingReturnPct.toFixed(2) }}%
+              </span>
+              <span class="overview__signal-zone">{{ t('risk.level.' + modelSignal.stackingRiskZone) }}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -364,5 +397,63 @@ watch(aiSummaryText, (newVal) => {
 @media (max-width: 1200px) {
   .overview__grid { grid-template-columns: 1fr; }
   .overview__bottom-row { grid-template-columns: 1fr; }
+}
+
+/* Model Signals */
+.overview__signals {
+  border-left: 3px solid var(--accent-primary);
+}
+
+.overview__signal-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.overview__signal-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(139, 92, 246, 0.04);
+  border: 1px solid var(--border-color);
+}
+
+.overview__signal-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.overview__signal-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.overview__signal-direction {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.overview__signal-sub {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.overview__signal-zone {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.signal--up {
+  color: var(--risk-low);
+}
+
+.signal--down {
+  color: var(--risk-high);
 }
 </style>

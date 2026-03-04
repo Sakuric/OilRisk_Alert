@@ -46,6 +46,12 @@ export default {
     staleWarning: '数据非实时',
     aiSummary: 'AI 风险摘要',
     noAISummary: '暂无AI摘要，请前往预警记录页生成',
+    modelSignals: {
+      title: '模型信号',
+      upProb: '上涨概率',
+      impactProb: '冲击概率',
+      direction: { Up: '上涨', Down: '下跌', Neutral: '持平' },
+    },
   },
   risk: {
     level: {

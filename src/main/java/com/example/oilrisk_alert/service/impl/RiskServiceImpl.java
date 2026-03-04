@@ -11,13 +11,21 @@ import com.example.oilrisk_alert.service.RiskService;
 import com.example.oilrisk_alert.util.LttbUtil;
 import com.example.oilrisk_alert.vo.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RiskServiceImpl implements RiskService {
@@ -25,6 +33,10 @@ public class RiskServiceImpl implements RiskService {
     private final RiskMapper riskMapper;
     private final FactorMapper factorMapper;
     private final AlertMapper alertMapper;
+    private final RestTemplate restTemplate;
+
+    @Value("${python.engine.url}")
+    private String pythonEngineUrl;
 
     private static final int LTTB_THRESHOLD = 2000;
 
@@ -128,5 +140,77 @@ public class RiskServiceImpl implements RiskService {
         vo.setAlerts(alertVOs);
 
         return vo;
+    }
+
+    @Override
+    public Map<String, Object> getPredictionFromEngine() {
+        return callPythonDaily();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public ModelSignalVO getModelSignals() {
+        Map<String, Object> prediction = callPythonDaily();
+
+        Map<String, Object> expertSignals = (Map<String, Object>) prediction.get("expert_signals");
+        Map<String, Object> dashboard = (Map<String, Object>) prediction.get("dashboard");
+        Map<String, Object> pred = (Map<String, Object>) prediction.get("prediction");
+
+        ModelSignalVO vo = new ModelSignalVO();
+        vo.setLstmPredPrice(toDouble(expertSignals.get("lstm_pred_price")));
+        vo.setLstmDirection(mapDirection((String) expertSignals.get("lstm_direction")));
+        vo.setLstmUpProb(toDouble(expertSignals.get("lstm_up_prob")));
+        vo.setXgbRiskScore(toDouble(expertSignals.get("xgb_risk_score")));
+        vo.setStackingReturnPct(toDouble(pred.get("predicted_return_pct")));
+        vo.setStackingRiskZone(mapRiskZone((String) pred.get("risk_zone")));
+        vo.setDate((String) dashboard.get("date"));
+
+        return vo;
+    }
+
+    private Map<String, Object> callPythonDaily() {
+        String url = pythonEngineUrl + "/predict/daily";
+        try {
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    null,
+                    new ParameterizedTypeReference<>() {}
+            );
+            Map<String, Object> body = response.getBody();
+            if (body == null) {
+                throw new BusinessException(502, "Empty response from Python engine");
+            }
+            return body;
+        } catch (RestClientException e) {
+            log.error("Failed to call Python engine for daily prediction: {}", e.getMessage());
+            throw new BusinessException(502, "Python prediction engine unavailable: " + e.getMessage());
+        }
+    }
+
+    private static double toDouble(Object val) {
+        if (val instanceof Number n) {
+            return n.doubleValue();
+        }
+        return 0.0;
+    }
+
+    private static String mapDirection(String direction) {
+        if (direction == null) return "Neutral";
+        return switch (direction) {
+            case "上升", "看涨", "上涨" -> "Up";
+            case "下降", "看跌", "下跌" -> "Down";
+            default -> direction;
+        };
+    }
+
+    private static String mapRiskZone(String zone) {
+        if (zone == null) return "Medium";
+        return switch (zone) {
+            case "高风险" -> "High";
+            case "低风险" -> "Low";
+            case "中风险" -> "Medium";
+            default -> zone;
+        };
     }
 }

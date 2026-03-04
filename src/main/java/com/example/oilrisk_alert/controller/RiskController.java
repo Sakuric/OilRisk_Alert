@@ -3,12 +3,16 @@ package com.example.oilrisk_alert.controller;
 import com.example.oilrisk_alert.common.Result;
 import com.example.oilrisk_alert.dto.TimeseriesQueryDTO;
 import com.example.oilrisk_alert.service.RiskService;
+import com.example.oilrisk_alert.vo.ModelSignalVO;
 import com.example.oilrisk_alert.vo.RiskCurrentVO;
 import com.example.oilrisk_alert.vo.TimeseriesVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -25,5 +29,15 @@ public class RiskController {
     @GetMapping("/factors/timeseries")
     public Result<TimeseriesVO> getTimeseries(TimeseriesQueryDTO query) {
         return Result.success(riskService.getTimeseries(query.getStart(), query.getEnd()));
+    }
+
+    @PostMapping("/predict/daily")
+    public Result<Map<String, Object>> getPrediction() {
+        return Result.success(riskService.getPredictionFromEngine());
+    }
+
+    @GetMapping("/risk/signals")
+    public Result<ModelSignalVO> getModelSignals() {
+        return Result.success(riskService.getModelSignals());
     }
 }

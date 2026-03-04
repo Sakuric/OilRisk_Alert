@@ -46,6 +46,12 @@ export default {
     staleWarning: 'Data is not real-time',
     aiSummary: 'AI Risk Summary',
     noAISummary: 'No AI summary available. Please generate one from the Alert Records page.',
+    modelSignals: {
+      title: 'Model Signals',
+      upProb: 'Up Probability',
+      impactProb: 'Impact Probability',
+      direction: { Up: 'Bullish', Down: 'Bearish', Neutral: 'Neutral' },
+    },
   },
   risk: {
     level: {

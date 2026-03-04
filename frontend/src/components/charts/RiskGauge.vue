@@ -12,7 +12,7 @@ const props = defineProps<{
 
 const chartRef = ref<HTMLDivElement>()
 let chart: echarts.ECharts | null = null
-const { echartsThemeConfig, isDark } = useTheme()
+const { isDark } = useTheme()
 const { t } = useI18n()
 
 const riskColor = computed(() => {
@@ -22,7 +22,6 @@ const riskColor = computed(() => {
 })
 
 function getOption(): echarts.EChartsOption {
-  const themeOpts = echartsThemeConfig.value
   return {
     backgroundColor: 'transparent',
     animationDuration: 1500,
@@ -99,7 +98,7 @@ function getOption(): echarts.EChartsOption {
         detail: {
           valueAnimation: true,
           fontSize: 36,
-          fontWeight: '800',
+          fontWeight: 800,
           offsetCenter: [0, '25%'],
           color: '#fff',
           formatter: '{value}',

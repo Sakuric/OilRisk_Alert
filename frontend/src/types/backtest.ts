@@ -1,7 +1,7 @@
 export interface BacktestParams {
   startDate: string
   endDate: string
-  model: 'XGBoost' | 'ARIMA' | 'LSTM'
+  model: 'XGBoost' | 'LSTM' | 'Stacking'
 }
 
 export interface BacktestResult {

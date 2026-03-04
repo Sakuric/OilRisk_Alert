@@ -2,7 +2,6 @@
 import { ref, watch, onMounted, onUnmounted, computed } from 'vue'
 import * as echarts from 'echarts'
 import { useTheme } from '@/composables/useTheme'
-import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores/app'
 import type { TopFactor } from '@/types/risk'
 
@@ -12,8 +11,7 @@ const props = defineProps<{
 
 const chartRef = ref<HTMLDivElement>()
 let chart: echarts.ECharts | null = null
-const { echartsThemeConfig, isDark } = useTheme()
-const { t } = useI18n()
+const { isDark } = useTheme()
 const appStore = useAppStore()
 
 const isZh = computed(() => appStore.locale === 'zh-CN')
@@ -23,7 +21,6 @@ const sorted = computed(() =>
 )
 
 function getOption(): echarts.EChartsOption {
-  const themeOpts = echartsThemeConfig.value
   const names = sorted.value.map((f) => (isZh.value ? f.nameZh : f.name))
   const values = sorted.value.map((f) => f.shap)
   const posColor = '#8b5cf6'
