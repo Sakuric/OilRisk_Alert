@@ -1,13 +1,15 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores/app'
+import LlmConfigModal from '@/components/common/LlmConfigModal.vue'
 
 const { t } = useI18n()
 const appStore = useAppStore()
 
 const isDark = computed(() => appStore.theme === 'dark')
 const isZh = computed(() => appStore.locale === 'zh-CN')
+const llmModalVisible = ref(false)
 
 type TimePreset = '1y' | '2y' | '5y' | 'all'
 const presets: TimePreset[] = ['1y', '2y', '5y', 'all']
@@ -34,6 +36,7 @@ function selectPreset(p: TimePreset) {
       </div>
     </div>
     <div class="topbar__right">
+      <button class="topbar__btn" @click="llmModalVisible = true" title="AI Config">AI</button>
       <button class="topbar__btn" @click="appStore.toggleLocale()" :title="isZh ? 'Switch to English' : '\u5207\u6362\u4E2D\u6587'">
         {{ isZh ? 'EN' : '\u4E2D' }}
       </button>
@@ -41,6 +44,7 @@ function selectPreset(p: TimePreset) {
         {{ isDark ? '\u2600\uFE0F' : '\uD83C\uDF19' }}
       </button>
     </div>
+    <LlmConfigModal v-model:visible="llmModalVisible" />
   </header>
 </template>
 

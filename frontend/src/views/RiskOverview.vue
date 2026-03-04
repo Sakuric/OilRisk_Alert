@@ -29,7 +29,10 @@ const aiSummaryText = ref('')
 const displayedAiSummary = ref('')
 const radarScores = ref<RadarScore[]>([])
 const modelSignal = ref<ModelSignal | null>(null)
+const aiGenerating = ref(false)
+const aiError = ref('')
 let typewriterTimer: any = null
+let currentEventSource: EventSource | null = null
 
 const riskIndex = computed(() => riskData.value?.riskIndex ?? 0)
 const riskLevel = computed(() => riskData.value?.riskLevel ?? 'Low')
@@ -81,8 +84,47 @@ async function fetchData() {
 
 onMounted(fetchData)
 
+function generateAiSummary() {
+  if (aiGenerating.value) return
+  aiGenerating.value = true
+  aiError.value = ''
+  displayedAiSummary.value = ''
+  clearInterval(typewriterTimer)
+
+  if (currentEventSource) {
+    currentEventSource.close()
+    currentEventSource = null
+  }
+
+  const es = new EventSource('/api/risk/ai-summary')
+  currentEventSource = es
+
+  es.onmessage = (e) => {
+    if (e.data === '[DONE]') {
+      aiGenerating.value = false
+      aiSummaryText.value = displayedAiSummary.value
+      es.close()
+      currentEventSource = null
+      return
+    }
+    try {
+      const { token } = JSON.parse(e.data)
+      displayedAiSummary.value += token
+    } catch {
+      // ignore malformed frames
+    }
+  }
+
+  es.onerror = () => {
+    aiGenerating.value = false
+    aiError.value = t('overview.aiSummaryError')
+    es.close()
+    currentEventSource = null
+  }
+}
+
 watch(aiSummaryText, (newVal) => {
-  if (llmExpanded.value) startTypewriter(newVal)
+  if (llmExpanded.value && !aiGenerating.value) startTypewriter(newVal)
 })
 </script>
 
@@ -184,6 +226,13 @@ watch(aiSummaryText, (newVal) => {
           <div class="overview__llm-title-group">
             <span class="ai-icon">&#10024;</span>
             <h3 class="overview__card-title">{{ t('overview.aiSummary') }}</h3>
+            <button
+              class="overview__ai-gen-btn"
+              :disabled="aiGenerating"
+              @click.stop="generateAiSummary"
+            >
+              {{ aiGenerating ? t('overview.generatingAiSummary') : t('overview.generateAiSummary') }}
+            </button>
           </div>
           <button class="overview__llm-toggle">
             <span>{{ llmExpanded ? '\u2212' : '+' }}</span>
@@ -191,7 +240,8 @@ watch(aiSummaryText, (newVal) => {
         </div>
         <div v-show="llmExpanded" class="overview__llm-body">
           <div class="typewriter-container">
-            <p v-if="displayedAiSummary" class="overview__llm-text">{{ displayedAiSummary }}<span class="cursor">|</span></p>
+            <p v-if="aiError" class="overview__llm-error">{{ aiError }}</p>
+            <p v-if="displayedAiSummary" class="overview__llm-text">{{ displayedAiSummary }}<span v-if="aiGenerating" class="cursor">|</span></p>
             <p v-else-if="aiSummaryText" class="overview__llm-text">{{ aiSummaryText }}</p>
             <p v-else class="overview__llm-placeholder">{{ t('overview.noAISummary') }}</p>
           </div>
@@ -379,6 +429,35 @@ watch(aiSummaryText, (newVal) => {
   color: var(--text-muted);
   font-size: 13px;
   font-style: italic;
+}
+
+.overview__ai-gen-btn {
+  padding: 3px 10px;
+  border: 1px solid var(--accent-primary);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--accent-primary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.overview__ai-gen-btn:hover:not(:disabled) {
+  background: var(--accent-primary);
+  color: #fff;
+}
+
+.overview__ai-gen-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.overview__llm-error {
+  color: var(--risk-high);
+  font-size: 13px;
+  margin: 0 0 8px;
 }
 
 .cursor {

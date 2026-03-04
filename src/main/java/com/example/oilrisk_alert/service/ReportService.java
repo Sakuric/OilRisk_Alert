@@ -5,4 +5,6 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 public interface ReportService {
 
     SseEmitter generateReport(Long alertId);
+
+    SseEmitter generateAiSummary();
 }
