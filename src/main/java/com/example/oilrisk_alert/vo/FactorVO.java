@@ -10,4 +10,5 @@ public class FactorVO {
     private String nameZh;
     private BigDecimal shap;
     private String category;
+    private BigDecimal value;
 }

@@ -13,7 +13,14 @@ import com.example.oilrisk_alert.vo.FactorVO;
 import com.example.oilrisk_alert.vo.RadarScoreVO;
 import com.example.oilrisk_alert.vo.WeightUpdateResultVO;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -21,6 +28,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FactorServiceImpl implements FactorService {
@@ -28,12 +36,89 @@ public class FactorServiceImpl implements FactorService {
     private final FactorMapper factorMapper;
     private final RiskMapper riskMapper;
     private final WeightsConfig weightsConfig;
+    private final RestTemplate restTemplate;
+
+    @Value("${python.engine.url}")
+    private String pythonEngineUrl;
 
     private static final List<String> CATEGORY_ORDER = List.of(
             "SUPPLY_DEMAND", "MACRO", "FINANCIAL", "GEOPOLITICAL", "SENTIMENT");
 
+    // ── SHAP 缓存（5分钟过期）──
+
+    private static class CachedShapResult {
+        final String date;
+        final double riskScore;
+        final List<FactorVO> factors;
+        final long timestamp;
+
+        CachedShapResult(String date, double riskScore, List<FactorVO> factors) {
+            this.date = date;
+            this.riskScore = riskScore;
+            this.factors = factors;
+            this.timestamp = System.currentTimeMillis();
+        }
+
+        boolean isExpired() {
+            return System.currentTimeMillis() - timestamp > 5 * 60 * 1000;
+        }
+    }
+
+    private volatile CachedShapResult shapCache;
+
+    // ── 调用 Python Engine /shap/factors ──
+
+    @SuppressWarnings("unchecked")
+    private CachedShapResult fetchRealShapFactors() {
+        if (shapCache != null && !shapCache.isExpired()) {
+            return shapCache;
+        }
+
+        String url = pythonEngineUrl + "/shap/factors";
+        try {
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                    url, HttpMethod.GET, null,
+                    new ParameterizedTypeReference<>() {});
+            Map<String, Object> body = response.getBody();
+            if (body == null) {
+                throw new RestClientException("Empty response");
+            }
+
+            String date = (String) body.get("date");
+            double riskScore = ((Number) body.get("riskScore")).doubleValue();
+            List<Map<String, Object>> rawFactors = (List<Map<String, Object>>) body.get("factors");
+
+            List<FactorVO> factors = new ArrayList<>();
+            for (Map<String, Object> raw : rawFactors) {
+                FactorVO vo = new FactorVO();
+                vo.setName((String) raw.get("name"));
+                vo.setNameZh((String) raw.get("nameZh"));
+                vo.setShap(BigDecimal.valueOf(((Number) raw.get("shapValue")).doubleValue()));
+                vo.setCategory((String) raw.get("category"));
+                vo.setValue(BigDecimal.valueOf(((Number) raw.get("value")).doubleValue()));
+                factors.add(vo);
+            }
+
+            CachedShapResult result = new CachedShapResult(date, riskScore, factors);
+            shapCache = result;
+            return result;
+        } catch (RestClientException e) {
+            log.warn("Failed to fetch SHAP factors from Python engine: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    // ── 公共 API ──
+
     @Override
     public List<RadarScoreVO> getRadarScores(LocalDate date) {
+        // 优先从 Python Engine 获取
+        CachedShapResult shap = fetchRealShapFactors();
+        if (shap != null) {
+            return buildRadarFromFactors(shap.factors);
+        }
+
+        // Fallback: 数据库
         if (date == null) {
             date = factorMapper.findLatestDate();
         }
@@ -46,34 +131,117 @@ public class FactorServiceImpl implements FactorService {
             throw new BusinessException(404, "No factor data for date: " + date);
         }
 
-        Map<String, List<RiskFactor>> grouped = factors.stream()
-                .collect(Collectors.groupingBy(RiskFactor::getCategory));
+        List<FactorVO> factorVOs = factors.stream().map(this::toFactorVO).collect(Collectors.toList());
+        return buildRadarFromFactors(factorVOs);
+    }
+
+    @Override
+    public List<FactorVO> getExplain(LocalDate date) {
+        // 优先从 Python Engine 获取
+        CachedShapResult shap = fetchRealShapFactors();
+        if (shap != null) {
+            return shap.factors;
+        }
+
+        // Fallback: 数据库
+        List<RiskFactor> factors = factorMapper.findByDate(date);
+        return factors.stream().map(this::toFactorVO).collect(Collectors.toList());
+    }
+
+    @Override
+    public WeightUpdateResultVO updateWeights(WeightDTO dto) {
+        validateWeights(dto);
+
+        weightsConfig.setSupplyDemand(dto.getSupplyDemand());
+        weightsConfig.setMacro(dto.getMacro());
+        weightsConfig.setFinancial(dto.getFinancial());
+        weightsConfig.setGeopolitical(dto.getGeopolitical());
+        weightsConfig.setSentiment(dto.getSentiment());
+
+        // baseRiskIndex: 始终使用 DB riskIndex，与 getCurrentRisk() 保持一致
+        // （Python Engine 的 riskScore 基于不同公式，直接用作 base 会导致权重调整后
+        //  riskIndex 与初始展示值断层，用户看到的表现是：改权重后指数从 60 跳到 0）
+        RiskIndex latest = riskMapper.findLatest();
+        if (latest == null) {
+            throw new BusinessException(404, "No risk data available");
+        }
+        double baseRiskIndex = latest.getRiskIndex().doubleValue();
+
+        // SHAP 因子: 优先 Python Engine 实时数据，fallback 数据库
+        List<FactorVO> allFactors;
+        CachedShapResult shap = fetchRealShapFactors();
+        if (shap != null) {
+            allFactors = shap.factors;
+        } else {
+            List<RiskFactor> dbFactors = factorMapper.findByDate(latest.getDate());
+            allFactors = dbFactors.stream().map(this::toFactorVO).collect(Collectors.toList());
+        }
+
+        // Recalculate adjusted risk index based on weighted SHAP deviation
+        double totalWeightedShap = 0;
+        double totalUnweightedShap = 0;
+        for (FactorVO f : allFactors) {
+            double absShap = Math.abs(f.getShap().doubleValue());
+            double weight = weightsConfig.getWeight(f.getCategory());
+            totalWeightedShap += absShap * weight;
+            totalUnweightedShap += absShap;
+        }
+
+        double ratio = totalUnweightedShap == 0 ? 1.0 : totalWeightedShap / totalUnweightedShap;
+        double adjustedIndex = Math.max(0, Math.min(100, baseRiskIndex * ratio));
+
+        BigDecimal newRiskIndex = BigDecimal.valueOf(adjustedIndex)
+                .setScale(2, RoundingMode.HALF_UP);
+
+        List<RadarScoreVO> radarScores = buildRadarFromFactors(allFactors);
+        List<FactorVO> topFactors = allFactors.stream()
+                .sorted(Comparator.comparingDouble(
+                        (FactorVO f) -> Math.abs(f.getShap().doubleValue())).reversed())
+                .limit(5)
+                .collect(Collectors.toList());
+
+        WeightUpdateResultVO result = new WeightUpdateResultVO();
+        result.setRiskIndex(newRiskIndex);
+        result.setRiskLevel(RiskLevel.fromIndex(newRiskIndex).getLabel());
+        result.setRadarScores(radarScores);
+        result.setTopFactors(topFactors);
+        return result;
+    }
+
+    // ── 内部方法 ──
+
+    private List<RadarScoreVO> buildRadarFromFactors(List<FactorVO> allFactors) {
+        Map<String, List<FactorVO>> grouped = allFactors.stream()
+                .collect(Collectors.groupingBy(FactorVO::getCategory));
 
         Map<String, Double> rawScores = new LinkedHashMap<>();
         Map<String, List<FactorVO>> topFactorsMap = new LinkedHashMap<>();
 
         for (String category : CATEGORY_ORDER) {
-            List<RiskFactor> catFactors = grouped.getOrDefault(category, Collections.emptyList());
+            List<FactorVO> catFactors = grouped.getOrDefault(category, Collections.emptyList());
             if (catFactors.isEmpty()) {
                 rawScores.put(category, 0.0);
                 topFactorsMap.put(category, Collections.emptyList());
                 continue;
             }
 
-            double avgAbsShap = catFactors.stream()
-                    .mapToDouble(f -> Math.abs(f.getShapValue().doubleValue()))
+            // 按 |SHAP| 降序排列，取 top-3 求均值
+            // 避免大量 SHAP≈0 的因子（如地缘政治 13 个中 8 个为 0）拉低均值
+            List<FactorVO> sorted = catFactors.stream()
+                    .sorted(Comparator.comparingDouble(
+                            (FactorVO f) -> Math.abs(f.getShap().doubleValue())).reversed())
+                    .collect(Collectors.toList());
+
+            double topAvgAbsShap = sorted.stream()
+                    .limit(3)
+                    .mapToDouble(f -> Math.abs(f.getShap().doubleValue()))
                     .average()
                     .orElse(0.0);
 
             double weight = weightsConfig.getWeight(category);
-            rawScores.put(category, avgAbsShap * weight);
+            rawScores.put(category, topAvgAbsShap * weight);
 
-            List<FactorVO> top3 = catFactors.stream()
-                    .sorted(Comparator.comparingDouble(
-                            (RiskFactor f) -> Math.abs(f.getShapValue().doubleValue())).reversed())
-                    .limit(3)
-                    .map(this::toFactorVO)
-                    .collect(Collectors.toList());
+            List<FactorVO> top3 = sorted.stream().limit(3).collect(Collectors.toList());
             topFactorsMap.put(category, top3);
         }
 
@@ -94,59 +262,6 @@ public class FactorServiceImpl implements FactorService {
             result.add(vo);
         }
 
-        return result;
-    }
-
-    @Override
-    public List<FactorVO> getExplain(LocalDate date) {
-        List<RiskFactor> factors = factorMapper.findByDate(date);
-        return factors.stream().map(this::toFactorVO).collect(Collectors.toList());
-    }
-
-    @Override
-    public WeightUpdateResultVO updateWeights(WeightDTO dto) {
-        validateWeights(dto);
-
-        weightsConfig.setSupplyDemand(dto.getSupplyDemand());
-        weightsConfig.setMacro(dto.getMacro());
-        weightsConfig.setFinancial(dto.getFinancial());
-        weightsConfig.setGeopolitical(dto.getGeopolitical());
-        weightsConfig.setSentiment(dto.getSentiment());
-
-        RiskIndex latest = riskMapper.findLatest();
-        if (latest == null) {
-            throw new BusinessException(404, "No risk data available");
-        }
-
-        LocalDate latestDate = latest.getDate();
-        List<RiskFactor> factors = factorMapper.findByDate(latestDate);
-
-        // Recalculate adjusted risk index based on weighted SHAP deviation
-        double totalWeightedShap = 0;
-        double totalUnweightedShap = 0;
-        for (RiskFactor f : factors) {
-            double absShap = Math.abs(f.getShapValue().doubleValue());
-            double weight = weightsConfig.getWeight(f.getCategory());
-            totalWeightedShap += absShap * weight;
-            totalUnweightedShap += absShap;
-        }
-
-        double ratio = totalUnweightedShap == 0 ? 1.0 : totalWeightedShap / totalUnweightedShap;
-        double adjustedIndex = Math.max(0, Math.min(100,
-                latest.getRiskIndex().doubleValue() * ratio));
-
-        BigDecimal newRiskIndex = BigDecimal.valueOf(adjustedIndex)
-                .setScale(2, RoundingMode.HALF_UP);
-
-        List<RadarScoreVO> radarScores = getRadarScores(latestDate);
-        List<FactorVO> topFactors = factorMapper.findTopByDateOrderByAbsShap(latestDate, 5)
-                .stream().map(this::toFactorVO).collect(Collectors.toList());
-
-        WeightUpdateResultVO result = new WeightUpdateResultVO();
-        result.setRiskIndex(newRiskIndex);
-        result.setRiskLevel(RiskLevel.fromIndex(newRiskIndex).getLabel());
-        result.setRadarScores(radarScores);
-        result.setTopFactors(topFactors);
         return result;
     }
 
@@ -174,6 +289,7 @@ public class FactorServiceImpl implements FactorService {
         vo.setNameZh(f.getFactorNameZh());
         vo.setShap(f.getShapValue());
         vo.setCategory(f.getCategory());
+        vo.setValue(f.getValue());
         return vo;
     }
 }

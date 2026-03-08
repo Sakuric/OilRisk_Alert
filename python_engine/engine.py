@@ -57,17 +57,29 @@ MARKET_STATE_COLS = [
 ]
 
 FACTOR_CATEGORY_MAP = {
-    "vix": "FINANCIAL", "ovx": "FINANCIAL", "hy": "FINANCIAL",
-    "spread": "FINANCIAL", "credit": "FINANCIAL",
-    "sentiment": "SENTIMENT", "news": "SENTIMENT",
-    "gpr": "GEOPOLITICAL", "geopolitics": "GEOPOLITICAL",
-    "opec": "SUPPLY_DEMAND", "supply": "SUPPLY_DEMAND",
+    # ── Supply / Demand（优先匹配：含能源期货价量数据）──
+    "supply": "SUPPLY_DEMAND", "demand": "SUPPLY_DEMAND",
+    "opec": "SUPPLY_DEMAND",
     "production": "SUPPLY_DEMAND", "inventory": "SUPPLY_DEMAND",
     "cushing": "SUPPLY_DEMAND", "rig": "SUPPLY_DEMAND",
-    "demand": "SUPPLY_DEMAND", "pmi": "MACRO",
+    "volume": "SUPPLY_DEMAND", "price": "SUPPLY_DEMAND",
+    "wti": "SUPPLY_DEMAND", "brent": "SUPPLY_DEMAND",
+    "gas": "SUPPLY_DEMAND", "fuel": "SUPPLY_DEMAND",
+    "rbob": "SUPPLY_DEMAND",
+    # ── Financial ──
+    "vix": "FINANCIAL", "ovx": "FINANCIAL", "hy": "FINANCIAL",
+    "spread": "FINANCIAL", "credit": "FINANCIAL",
+    "gold": "FINANCIAL",
+    # ── Geopolitical ──
+    "gpr": "GEOPOLITICAL", "geopolitics": "GEOPOLITICAL",
+    # ── Macro ──
+    "pmi": "MACRO",
     "gdp": "MACRO", "cpi": "MACRO", "yield": "MACRO",
     "treasury": "MACRO", "dollar": "MACRO", "exchange": "MACRO",
     "sp500": "MACRO", "macro": "MACRO",
+    "crb": "MACRO", "美元": "MACRO",
+    # ── Sentiment（放最后：避免 'sentiment' 误匹配含此词的其他分类因子）──
+    "sentiment": "SENTIMENT", "news": "SENTIMENT",
 }
 
 
@@ -77,6 +89,64 @@ def _classify_factor(name: str) -> str:
         if kw in low:
             return cat
     return "OTHER"
+
+
+# ── 特征名中文映射表 ──
+FEATURE_NAME_ZH = {
+    # 风险/情绪指标
+    "Risk_VIX_VIX恐慌指数_VIX_Index": "VIX恐慌指数",
+    "Risk_VIX_情绪组_VIX__Value": "VIX情绪指标",
+    "Risk_VIX_情绪组_OVX__Value": "OVX原油波动率",
+    "情绪组_HY_S_Value": "高收益利差",
+    "情绪组_GOLD_Value": "黄金情绪指标",
+    "Risk_Sentiment_新闻情感指数__News_Sentiment": "新闻情感指数",
+    "Risk_Geopolitics_情绪组_GPR__Value": "地缘政治风险指数",
+    # 地缘政治事件
+    "Risk_Geopolitics_地缘政治事件综合评分": "地缘政治综合评分",
+    "Risk_Geopolitics_俄乌冲突": "俄乌冲突风险",
+    "Risk_Geopolitics_中东局势_伊朗_沙特_也门": "中东局势风险",
+    "Risk_Geopolitics_利比亚油田冲突": "利比亚油田冲突",
+    "Risk_Geopolitics_美国对委内瑞拉制裁": "美对委内瑞拉制裁",
+    "Risk_Geopolitics_OPEC_plus会议结果影响": "OPEC+会议影响",
+    "Risk_Geopolitics_国际能源政策与能源制裁": "国际能源制裁",
+    "Risk_Geopolitics_红海航运危机_也门胡塞武装": "红海航运危机",
+    "Risk_Geopolitics_霍尔木兹海峡安全风险": "霍尔木兹海峡风险",
+    "Risk_Geopolitics_以色列巴勒斯坦冲突外溢风险": "巴以冲突外溢风险",
+    "Risk_Geopolitics_伊朗核问题相关制裁与谈判": "伊朗核问题制裁",
+    "Risk_Geopolitics_事件持续周期_天": "地缘事件持续天数",
+    # 价格类（含volume）
+    "Price_WTI_WTI期货_volume": "WTI期货成交量",
+    "Price_Brent_布伦特原油期货_volume": "布伦特期货成交量",
+    "Price_RBOB_RBOB汽油期货_volume": "RBOB汽油期货成交量",
+    "Price_Fuel_取暖油期货_volume": "取暖油期货成交量",
+    "Price_Gas_天然气期货_volume": "天然气期货成交量",
+    # 供给
+    "Supply_Inventory_US_Cushing__Value (库存)": "库欣原油库存",
+    "Supply_Production_OPEC_OPEC每月原油_OPEC石油输出国组织": "OPEC总产量",
+    "Supply_Production_OPEC_OPEC每月原油_沙特阿拉伯": "沙特原油产量",
+    "Supply_Production_OPEC_非OPEC国家原_俄罗斯联邦": "俄罗斯原油产量",
+    # 宏观
+    "Macro_CPI_10年期通胀预期_T10YIE": "10年期通胀预期",
+    "Macro_SP500_标普500指数_SP500_Close": "标普500指数",
+    "Macro_Yield_美债10年收益率_US_10Y_Treasury_Yield": "美债10年收益率",
+    "美元指数_日频": "美元指数",
+    "CRB现货指数_日频": "CRB现货指数",
+    # 需求
+    "Demand_PMI_中国制造业PMI_China_Manufacturing_PMI": "中国制造业PMI",
+    "Demand_PMI_欧元区制造业PM_Eurozone_Manufacturing_PMI": "欧元区制造业PMI",
+    "Demand_PMI_美国制造业PMI_US_Consumer_Sentiment": "美国消费者信心",
+}
+
+
+def _auto_name_mapping(raw_col: str) -> str:
+    """从特征列名自动提取中文名。优先查映射表，否则提取中文片段。"""
+    if raw_col in FEATURE_NAME_ZH:
+        return FEATURE_NAME_ZH[raw_col]
+    import re
+    zh_parts = re.findall(r'[\u4e00-\u9fff]+', raw_col)
+    if zh_parts:
+        return ''.join(zh_parts)
+    return raw_col
 
 
 # ── PyTorch LSTM 模型定义（与训练代码完全一致）──
@@ -186,6 +256,9 @@ class OilRiskEngine:
         # 预计算 XGBoost SHAP (TreeExplainer)
         self.xgb_explainer = shap.TreeExplainer(self.xgb_model)
 
+        # SHAP 因子缓存
+        self._shap_cache = None
+
         # 预加载数据
         self.df_raw, self.df_feat, self.df_ffill = self._load_data()
 
@@ -279,6 +352,59 @@ class OilRiskEngine:
     # ═══════════════════════════════════════
     # 公共 API
     # ═══════════════════════════════════════
+
+    def get_all_shap_factors(self):
+        """计算全量 SHAP 因子，结合 Stacking 输出真实风险分数。结果缓存。"""
+        if self._shap_cache is not None:
+            return self._shap_cache
+
+        df_raw = self.df_raw
+        df_feat = self.df_feat
+
+        # 构建 XGBoost 输入（最新一行）
+        row = df_raw.iloc[[-1]]
+        X = pd.DataFrame(index=[0])
+        for col in self.xgb_features:
+            X[col] = float(row[col].iloc[0]) if col in row.columns else 0.0
+
+        # 全量 SHAP 值
+        sv = self.xgb_explainer.shap_values(X)
+        shap_vals = sv[0] if isinstance(sv, list) else sv[0]
+
+        # Stacking 真实风险分数
+        loc = len(df_feat) - 1
+        current_price = float(df_feat["price"].iloc[-1])
+        lstm_pred_price, _ = self._lstm_predict_single(df_feat, loc)
+        lstm_impl_return = (lstm_pred_price - current_price) / current_price
+        xgb_risk_score = self._xgb_predict(df_raw.iloc[[-1]])
+        market_state = df_raw[MARKET_STATE_COLS].iloc[-1].fillna(0).values.astype(float)
+        pred_return_pct, _ = self._stacking_predict(
+            market_state, lstm_impl_return, xgb_risk_score
+        )
+        risk_score = max(0, min(100, 50 - pred_return_pct * 10))
+
+        # 构建因子列表
+        factors = []
+        for i, name in enumerate(self.xgb_features):
+            factors.append({
+                "name": name,
+                "nameZh": _auto_name_mapping(name),
+                "shapValue": round(float(shap_vals[i]), 6),
+                "value": round(float(X[name].iloc[0]), 4),
+                "category": _classify_factor(name),
+            })
+
+        factors.sort(key=lambda f: abs(f["shapValue"]), reverse=True)
+
+        last_date = str(df_feat.index[-1].date())
+        result = {
+            "date": last_date,
+            "riskScore": round(risk_score, 2),
+            "factors": factors,
+        }
+
+        self._shap_cache = result
+        return result
 
     def predict_daily(self):
         """读取 CSV 最新数据，调用三个模型，返回完整预测结果。"""

@@ -1,6 +1,6 @@
 import http from './index'
 import type { ApiResponse } from '@/types/alert'
-import type { FactorDetail, RadarScore, WeightConfig } from '@/types/factor'
+import type { FactorDetail, RadarScore, WeightConfig, WeightUpdateResult } from '@/types/factor'
 
 export function getFactorExplanation(date: string) {
   return http.get<ApiResponse<FactorDetail[]>>(`/api/explain/${date}`)
@@ -11,5 +11,5 @@ export function getRadarScores() {
 }
 
 export function updateWeights(weights: WeightConfig, signal?: AbortSignal) {
-  return http.put<ApiResponse<unknown>>('/api/config/weights', weights, { signal })
+  return http.put<ApiResponse<WeightUpdateResult>>('/api/config/weights', weights, { signal })
 }

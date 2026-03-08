@@ -61,6 +61,7 @@ public class RiskServiceImpl implements RiskService {
             fv.setNameZh(rf.getFactorNameZh());
             fv.setShap(rf.getShapValue());
             fv.setCategory(rf.getCategory());
+            fv.setValue(rf.getValue());
             factorVOs.add(fv);
         }
         vo.setTopFactors(factorVOs);

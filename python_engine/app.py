@@ -52,6 +52,17 @@ def predict_daily():
         raise HTTPException(500, str(e))
 
 
+@app.get("/shap/factors")
+def shap_factors():
+    if engine is None:
+        raise HTTPException(503, "Engine not initialized")
+    try:
+        return engine.get_all_shap_factors()
+    except Exception as e:
+        logger.exception("shap_factors failed")
+        raise HTTPException(500, str(e))
+
+
 @app.post("/predict/backtest")
 def predict_backtest(req: BacktestRequest):
     if engine is None:

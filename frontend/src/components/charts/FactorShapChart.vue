@@ -40,6 +40,7 @@ function getOption(): echarts.EChartsOption {
       right: 40,
       top: 10,
       bottom: 10,
+      containLabel: true,
     },
     xAxis: {
       type: 'value',
@@ -75,7 +76,8 @@ function getOption(): echarts.EChartsOption {
             return p.value.toFixed(3)
           },
         },
-        animationDuration: 600,
+        animationDuration: 800,
+        animationEasing: 'cubicOut',
       },
     ],
   }
@@ -89,7 +91,7 @@ function initChart() {
 
 function updateChart() {
   if (!chart) return
-  chart.setOption(getOption(), { notMerge: true })
+  chart.setOption(getOption())
 }
 
 function handleResize() {

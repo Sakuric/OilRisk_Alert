@@ -1,4 +1,4 @@
-export type FactorCategory = 'Supply-Demand' | 'Macro' | 'Financial' | 'Geopolitical' | 'Sentiment'
+export type FactorCategory = 'SUPPLY_DEMAND' | 'MACRO' | 'FINANCIAL' | 'GEOPOLITICAL' | 'SENTIMENT'
 
 export interface FactorDetail {
   name: string
@@ -15,11 +15,11 @@ export interface CategoryScore {
 }
 
 export const FACTOR_CATEGORIES: FactorCategory[] = [
-  'Supply-Demand',
-  'Macro',
-  'Financial',
-  'Geopolitical',
-  'Sentiment',
+  'SUPPLY_DEMAND',
+  'MACRO',
+  'FINANCIAL',
+  'GEOPOLITICAL',
+  'SENTIMENT',
 ]
 
 export interface RadarScore {
@@ -35,4 +35,11 @@ export interface WeightConfig {
   financial: number
   geopolitical: number
   sentiment: number
+}
+
+export interface WeightUpdateResult {
+  riskIndex: number
+  riskLevel: 'Low' | 'Medium' | 'High'
+  radarScores: RadarScore[]
+  topFactors: FactorDetail[]
 }

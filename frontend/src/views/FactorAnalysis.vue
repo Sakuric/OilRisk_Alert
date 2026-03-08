@@ -7,12 +7,16 @@ import { getCurrentRisk } from '@/api/risk'
 import RadarChart from '@/components/charts/RadarChart.vue'
 import FactorShapChart from '@/components/charts/FactorShapChart.vue'
 import type { RadarScore, WeightConfig, FactorDetail } from '@/types/factor'
+import type { RiskLevel } from '@/types/risk'
+import { RISK_COLORS } from '@/types/risk'
 
 const { t } = useI18n()
 const appStore = useAppStore()
 
 const radarData = ref<RadarScore[]>([])
 const shapFactors = ref<FactorDetail[]>([])
+const riskIndex = ref<number | null>(null)
+const riskLevel = ref<RiskLevel | null>(null)
 const loading = ref(false)
 const weightsLoading = ref(false)
 const error = ref<string | null>(null)
@@ -28,6 +32,7 @@ const weights = ref<WeightConfig>({
 
 const themeMode = computed(() => appStore.theme)
 const locale = computed(() => (appStore.locale === 'zh-CN' ? 'zh' : 'en') as 'zh' | 'en')
+const riskColor = computed(() => riskLevel.value ? RISK_COLORS[riskLevel.value] : undefined)
 
 const weightSliders = computed(() => [
   { key: 'supplyDemand' as const, label: t('factorAnalysis.supplyDemand') },
@@ -44,13 +49,15 @@ async function fetchData() {
   loading.value = true
   error.value = null
   try {
-    // Get latest date from risk/current, then use it for SHAP query
-    const riskRes = await getCurrentRisk()
-    latestDate.value = riskRes.data.data.date
-    const [radarRes, shapRes] = await Promise.all([
-      getRadarScores(),
-      getFactorExplanation(latestDate.value),
-    ])
+    const riskPromise = getCurrentRisk()
+    const radarPromise = getRadarScores()
+    const shapPromise = riskPromise.then((res) => {
+      latestDate.value = res.data.data.date
+      riskIndex.value = res.data.data.riskIndex
+      riskLevel.value = res.data.data.riskLevel
+      return getFactorExplanation(res.data.data.date)
+    })
+    const [, radarRes, shapRes] = await Promise.all([riskPromise, radarPromise, shapPromise])
     radarData.value = radarRes.data.data
     shapFactors.value = shapRes.data.data
   } catch (e) {
@@ -77,15 +84,11 @@ async function submitWeights() {
   }, 5000)
 
   try {
-    await updateWeights(weights.value, abortController.signal)
-    // Refresh data after weight update
-    const date = latestDate.value || new Date().toISOString().slice(0, 10)
-    const [radarRes, shapRes] = await Promise.all([
-      getRadarScores(),
-      getFactorExplanation(date),
-    ])
-    radarData.value = radarRes.data.data
-    shapFactors.value = shapRes.data.data
+    const res = await updateWeights(weights.value, abortController.signal)
+    const result = res.data.data
+    riskIndex.value = result.riskIndex
+    riskLevel.value = result.riskLevel
+    radarData.value = result.radarScores
   } catch (e) {
     if (e instanceof DOMException && e.name === 'AbortError') {
       error.value = t('factorAnalysis.timeout')
@@ -131,10 +134,17 @@ onUnmounted(() => {
       <button class="factor-analysis__error-close" @click="error = null">&times;</button>
     </div>
 
+    <!-- Risk Index Card -->
+    <div v-if="riskIndex !== null" class="factor-analysis__risk-card" :style="{ borderColor: riskColor }">
+      <span class="factor-analysis__risk-label">{{ t('overview.gauge.riskIndex') }}</span>
+      <span class="factor-analysis__risk-value" :style="{ color: riskColor }">{{ riskIndex.toFixed(1) }}</span>
+      <span class="factor-analysis__risk-level" :style="{ color: riskColor }">{{ t('risk.level.' + riskLevel) }}</span>
+    </div>
+
     <!-- Radar row -->
     <div class="factor-analysis__card factor-analysis__radar">
       <h3 class="factor-analysis__card-title">{{ t('factorAnalysis.radarTitle') }}</h3>
-      <RadarChart :data="radarData" :theme="themeMode" />
+      <RadarChart :data="radarData" :theme="themeMode" :locale="locale" />
     </div>
 
     <!-- Bottom row: SHAP + Weights -->
@@ -217,6 +227,34 @@ onUnmounted(() => {
   font-size: 18px;
   cursor: pointer;
   padding: 0 4px;
+}
+
+.factor-analysis__risk-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-left-width: 3px;
+  border-radius: 8px;
+  padding: 12px 16px;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+.factor-analysis__risk-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.factor-analysis__risk-value {
+  font-size: 24px;
+  font-weight: 700;
+  font-family: monospace;
+}
+
+.factor-analysis__risk-level {
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .factor-analysis__card {
@@ -326,5 +364,11 @@ onUnmounted(() => {
   font-size: 12px;
   color: var(--text-secondary);
   font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .factor-analysis__bottom {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

@@ -2,7 +2,7 @@ export interface TopFactor {
   name: string
   nameZh: string
   shap: number
-  category: 'Supply-Demand' | 'Macro' | 'Financial' | 'Geopolitical' | 'Sentiment'
+  category: 'SUPPLY_DEMAND' | 'MACRO' | 'FINANCIAL' | 'GEOPOLITICAL' | 'SENTIMENT'
 }
 
 export interface ModelSignal {
