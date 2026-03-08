@@ -49,6 +49,9 @@ export default {
     generateAiSummary: '生成AI摘要',
     generatingAiSummary: '生成中...',
     aiSummaryError: 'AI摘要生成失败',
+    alertTimeline: {
+      title: '预警时间线',
+    },
     modelSignals: {
       title: '模型信号',
       upProb: '上涨概率',
@@ -94,6 +97,8 @@ export default {
     calculating: '计算中...',
     timeout: '计算超时，请重试',
     radarTitle: '五维风险雷达图',
+    weightPercentage: '权重 (%)',
+    weightHistory: '因子权重演变',
   },
   alertRecords: {
     triggerRules: '触发规则链',

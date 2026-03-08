@@ -49,6 +49,9 @@ export default {
     generateAiSummary: 'Generate AI Summary',
     generatingAiSummary: 'Generating...',
     aiSummaryError: 'AI summary generation failed',
+    alertTimeline: {
+      title: 'Alert Timeline',
+    },
     modelSignals: {
       title: 'Model Signals',
       upProb: 'Up Probability',
@@ -94,6 +97,8 @@ export default {
     calculating: 'Calculating...',
     timeout: 'Calculation timed out, please retry',
     radarTitle: 'Five-Dimension Risk Radar',
+    weightPercentage: 'Weight (%)',
+    weightHistory: 'Factor Weight Evolution',
   },
   alertRecords: {
     triggerRules: 'Trigger Rule Chain',

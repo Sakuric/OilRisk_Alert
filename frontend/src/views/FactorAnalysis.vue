@@ -6,6 +6,8 @@ import { getRadarScores, getFactorExplanation, updateWeights } from '@/api/facto
 import { getCurrentRisk } from '@/api/risk'
 import RadarChart from '@/components/charts/RadarChart.vue'
 import FactorShapChart from '@/components/charts/FactorShapChart.vue'
+import WeightAreaChart from '@/components/charts/WeightAreaChart.vue'
+import type { WeightDataPoint } from '@/components/charts/WeightAreaChart.vue'
 import type { RadarScore, WeightConfig, FactorDetail } from '@/types/factor'
 import type { RiskLevel } from '@/types/risk'
 import { RISK_COLORS } from '@/types/risk'
@@ -113,7 +115,38 @@ function resetWeights() {
   onWeightChange()
 }
 
-onMounted(fetchData)
+// 权重演变数据（mock，后续可替换为真实API）
+const weightHistoryData = ref<WeightDataPoint[]>([])
+
+function generateMockWeightData(): WeightDataPoint[] {
+  const data: WeightDataPoint[] = []
+  const base = { supplyDemand: 25, macro: 18, financial: 22, geopolitical: 20, sentiment: 15 }
+  for (let m = 0; m < 24; m++) {
+    const d = new Date(2023, m, 1)
+    const drift = () => (Math.random() - 0.5) * 6
+    const sd = Math.max(5, base.supplyDemand + drift())
+    const ma = Math.max(5, base.macro + drift())
+    const fi = Math.max(5, base.financial + drift())
+    const ge = Math.max(5, base.geopolitical + drift())
+    const total = sd + ma + fi + ge
+    const se = Math.max(5, 100 - total)
+    const norm = sd + ma + fi + ge + se
+    data.push({
+      date: d.toISOString().slice(0, 10),
+      supplyDemand: +(sd / norm * 100).toFixed(2),
+      macro: +(ma / norm * 100).toFixed(2),
+      financial: +(fi / norm * 100).toFixed(2),
+      geopolitical: +(ge / norm * 100).toFixed(2),
+      sentiment: +(se / norm * 100).toFixed(2),
+    })
+  }
+  return data
+}
+
+onMounted(() => {
+  fetchData()
+  weightHistoryData.value = generateMockWeightData()
+})
 
 onUnmounted(() => {
   if (debounceTimer) clearTimeout(debounceTimer)
@@ -145,6 +178,12 @@ onUnmounted(() => {
     <div class="factor-analysis__card factor-analysis__radar">
       <h3 class="factor-analysis__card-title">{{ t('factorAnalysis.radarTitle') }}</h3>
       <RadarChart :data="radarData" :theme="themeMode" :locale="locale" />
+    </div>
+
+    <!-- Weight Evolution Chart -->
+    <div class="factor-analysis__card factor-analysis__weight-history">
+      <h3 class="factor-analysis__card-title">{{ t('factorAnalysis.weightHistory') }}</h3>
+      <WeightAreaChart :data="weightHistoryData" />
     </div>
 
     <!-- Bottom row: SHAP + Weights -->
@@ -274,6 +313,10 @@ onUnmounted(() => {
 
 .factor-analysis__radar {
   min-height: 320px;
+}
+
+.factor-analysis__weight-history {
+  min-height: 380px;
 }
 
 .factor-analysis__bottom {

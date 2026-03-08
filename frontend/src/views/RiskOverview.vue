@@ -6,20 +6,23 @@ import { useTimeseries } from '@/composables/useTimeseries'
 import { useAlerts } from '@/composables/useAlerts'
 import { useRiskStore } from '@/stores/risk'
 import { useTheme } from '@/composables/useTheme'
+import { useAppStore } from '@/stores/app'
 import { getAlerts } from '@/api/alert'
 import { getRadarScores } from '@/api/factor'
 import { getModelSignals } from '@/api/risk'
 import RiskGauge from '@/components/charts/RiskGauge.vue'
-import PriceRiskChart from '@/components/charts/PriceRiskChart.vue'
+import PriceRiskAlertChart from '@/components/charts/PriceRiskAlertChart.vue'
 import FactorBarChart from '@/components/charts/FactorBarChart.vue'
 import RadarChart from '@/components/charts/RadarChart.vue'
 import AlertCard from '@/components/common/AlertCard.vue'
 import type { RadarScore } from '@/types/factor'
-import type { ModelSignal } from '@/types/risk'
+import type { ModelSignal, TimeseriesPoint } from '@/types/risk'
 
 const { t } = useI18n()
 const riskStore = useRiskStore()
 const { isDark } = useTheme()
+const appStore = useAppStore()
+const locale = computed(() => (appStore.locale === 'zh-CN' ? 'zh' : 'en') as 'zh' | 'en')
 const { data: riskData } = useRisk()
 const { data: tsData } = useTimeseries()
 const { data: alertsData } = useAlerts({ page: 1, size: 3 })
@@ -123,6 +126,12 @@ function generateAiSummary() {
   }
 }
 
+const selectedAlert = ref<TimeseriesPoint | null>(null)
+
+function onAlertSelect(alert: TimeseriesPoint) {
+  selectedAlert.value = alert
+}
+
 watch(aiSummaryText, (newVal) => {
   if (llmExpanded.value && !aiGenerating.value) startTypewriter(newVal)
 })
@@ -150,7 +159,7 @@ watch(aiSummaryText, (newVal) => {
         <div class="overview__card glass-card">
           <h3 class="overview__card-title">{{ t('factorAnalysis.radarTitle') }}</h3>
           <div class="chart-container">
-            <RadarChart :data="radarScores" :theme="isDark ? 'dark' : 'light'" />
+            <RadarChart :data="radarScores" :theme="isDark ? 'dark' : 'light'" :locale="locale" />
           </div>
         </div>
 
@@ -187,11 +196,12 @@ watch(aiSummaryText, (newVal) => {
         <div class="overview__card glass-card">
           <h3 class="overview__card-title">{{ t('overview.priceChart.title') }}</h3>
           <div class="chart-container-large">
-            <PriceRiskChart
+            <PriceRiskAlertChart
               :dates="dates"
               :oil-price="oilPrice"
               :risk-index="tsRiskIndex"
               :alerts="tsAlerts"
+              @select-alert="onAlertSelect"
             />
           </div>
         </div>
