@@ -2,6 +2,7 @@
 OilRisk-Alert 推理引擎 — 封装 LSTM / XGBoost / Stacking 三模型
 """
 
+import logging
 import os
 import sys
 import warnings
@@ -13,6 +14,7 @@ import torch.nn as nn
 import shap
 
 warnings.filterwarnings("ignore")
+logger = logging.getLogger("oilrisk.engine")
 
 # ── 路径配置 ──
 MODEL_DIR = os.environ.get(
@@ -214,7 +216,9 @@ def _build_lstm_features(df: pd.DataFrame) -> pd.DataFrame:
 
     feat["y_price"] = price.shift(-HORIZON)
     feat["y_label"] = (feat["y_price"] > price).astype(int)
-    feat = feat.dropna()
+    # 仅对特征列 dropna，保留 y_price/y_label 为 NaN 的最新行（推理需要）
+    feature_cols = [c for c in feat.columns if c not in ("y_price", "y_label")]
+    feat = feat.dropna(subset=feature_cols)
     return feat
 
 
@@ -261,6 +265,84 @@ class OilRiskEngine:
 
         # 预加载数据
         self.df_raw, self.df_feat, self.df_ffill = self._load_data()
+
+    def reload_from_db(self) -> dict:
+        """
+        从 MySQL 读取最新因子数据，合并到历史 DataFrame，重新推理。
+
+        流程:
+        1. 查询 factor_realtime 中 CSV 结束后所有因子（填充完整缺口）
+        2. 构造多行 append 到 self.df_raw
+        3. 重算 LSTM 特征 (技术指标)
+        4. 执行三模型推理
+        5. 返回推理结果
+        """
+        try:
+            import db as db_module
+        except ImportError:
+            return {"error": "db module not available, staying in CSV mode"}
+
+        try:
+            # 获取 CSV 之后所有日期的因子数据（而非仅最新1天）
+            csv_end_date = self.df_raw.index[-1].date()
+            all_date_factors = db_module.get_all_factors_since(csv_end_date)
+        except Exception as e:
+            logger.warning("DB connection failed, staying in CSV mode: %s", e)
+            return self.predict_daily()
+
+        if not all_date_factors:
+            logger.info("No new factor data in DB after %s, using existing data", csv_end_date)
+            return self.predict_daily()
+
+        # 为每个日期构造一行数据
+        new_dfs = []
+        for dt in sorted(all_date_factors.keys()):
+            factors = all_date_factors[dt]
+            if not factors:
+                continue
+            row_df = pd.DataFrame([factors], index=pd.DatetimeIndex([pd.Timestamp(dt)]))
+            new_dfs.append(row_df)
+
+        if not new_dfs:
+            return self.predict_daily()
+
+        new_data = pd.concat(new_dfs)
+
+        # 确保所有现有列都存在
+        for col in self.df_raw.columns:
+            if col not in new_data.columns:
+                new_data[col] = np.nan
+
+        # 合并到现有数据
+        self.df_raw = pd.concat([self.df_raw, new_data[self.df_raw.columns]])
+        self.df_raw = self.df_raw[~self.df_raw.index.duplicated(keep="last")]
+        self.df_raw = self.df_raw.sort_index()
+        self.df_raw = self.df_raw.ffill().bfill()
+
+        # 重建 LSTM 特征
+        wti_valid = self.df_raw[self.df_raw[TARGET_COL].notna()].index
+        df_valid = self.df_raw.loc[wti_valid]
+        self.df_feat = _build_lstm_features(df_valid)
+
+        # 更新 ffill 副本
+        self.df_ffill = self.df_raw.ffill().bfill()
+
+        # 清除 SHAP 缓存
+        self._shap_cache = None
+
+        latest_date = self.df_feat.index[-1].date()
+        logger.info("reload_from_db: merged %d dates, df_feat ends at %s",
+                     len(new_dfs), latest_date)
+
+        # 重新推理
+        try:
+            result = self.predict_daily()
+            logger.info("reload_from_db 推理完成: date=%s, score=%s",
+                        latest_date, result.get("dashboard", {}).get("score"))
+            return result
+        except Exception as e:
+            logger.error("reload_from_db 推理失败: %s", e)
+            return {"error": f"Inference failed after data reload: {e}"}
 
     def _load_data(self):
         df_orig = pd.read_csv(DATA_PATH, encoding="utf-8-sig")

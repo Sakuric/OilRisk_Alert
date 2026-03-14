@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { getCurrentRisk, getTimeseries } from '@/api/risk'
 import type { CurrentRisk, TimeseriesData } from '@/types/risk'
 
 export const useRiskStore = defineStore('risk', () => {
@@ -30,6 +31,30 @@ export const useRiskStore = defineStore('risk', () => {
     stale.value = true
   }
 
+  async function fetchCurrentRisk() {
+    loading.value = true
+    error.value = null
+    try {
+      const res = await getCurrentRisk()
+      currentRisk.value = res.data.data
+      stale.value = false
+    } catch (e) {
+      error.value = e instanceof Error ? e.message : 'Unknown error'
+      stale.value = true
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function fetchTimeseries(start?: string, end?: string) {
+    try {
+      const res = await getTimeseries({ start, end })
+      timeseriesData.value = res.data.data
+    } catch {
+      // silent — timeseries refresh is best-effort
+    }
+  }
+
   return {
     currentRisk,
     timeseriesData,
@@ -41,5 +66,7 @@ export const useRiskStore = defineStore('risk', () => {
     setLoading,
     setError,
     markStale,
+    fetchCurrentRisk,
+    fetchTimeseries,
   }
 })

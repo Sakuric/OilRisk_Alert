@@ -22,4 +22,14 @@
         LIMIT #{param2}
     </select>
 
+    <select id="findWeightHistory" resultType="java.util.HashMap">
+        SELECT `date`,
+               category,
+               SUM(ABS(shap_value)) AS total_shap
+        FROM risk_factor
+        WHERE `date` BETWEEN #{param1} AND #{param2}
+        GROUP BY `date`, category
+        ORDER BY `date` ASC, category ASC
+    </select>
+
 </mapper>

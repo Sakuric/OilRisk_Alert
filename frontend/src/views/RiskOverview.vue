@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useRisk } from '@/composables/useRisk'
 import { useTimeseries } from '@/composables/useTimeseries'
 import { useAlerts } from '@/composables/useAlerts'
+import { useDataFreshness } from '@/composables/useDataFreshness'
 import { useRiskStore } from '@/stores/risk'
 import { useTheme } from '@/composables/useTheme'
 import { useAppStore } from '@/stores/app'
@@ -26,6 +27,15 @@ const locale = computed(() => (appStore.locale === 'zh-CN' ? 'zh' : 'en') as 'zh
 const { data: riskData } = useRisk()
 const { data: tsData } = useTimeseries()
 const { data: alertsData } = useAlerts({ page: 1, size: 3 })
+const {
+  freshnessLevel,
+  dataDate: statusDataDate,
+  updatedTime,
+  collecting,
+  collectResult,
+  collectError,
+  triggerManualCollect,
+} = useDataFreshness()
 
 const llmExpanded = ref(true)
 const aiSummaryText = ref('')
@@ -141,6 +151,43 @@ watch(aiSummaryText, (newVal) => {
   <div class="overview">
     <div v-if="riskStore.stale" class="overview__stale-banner">
       {{ t('overview.staleWarning') }}
+    </div>
+
+    <!-- Data Freshness Status Bar -->
+    <div class="overview__status-bar glass-card">
+      <div class="overview__status-info">
+        <span
+          class="overview__status-dot"
+          :class="`overview__status-dot--${freshnessLevel}`"
+        ></span>
+        <span class="overview__status-label">
+          {{ t('overview.dataStatus.label') }}:
+          <strong>{{ t('overview.dataStatus.' + freshnessLevel) }}</strong>
+        </span>
+        <span v-if="statusDataDate" class="overview__status-sep">|</span>
+        <span v-if="statusDataDate" class="overview__status-item">
+          {{ t('overview.dataStatus.dataDate') }}: {{ statusDataDate }}
+        </span>
+        <span v-if="updatedTime" class="overview__status-sep">|</span>
+        <span v-if="updatedTime" class="overview__status-item">
+          {{ t('overview.dataStatus.updatedAt') }}: {{ updatedTime }}
+        </span>
+      </div>
+      <div class="overview__status-actions">
+        <span v-if="collectResult" class="overview__status-result overview__status-result--ok">
+          {{ collectResult.collection ? `${t('overview.dataStatus.collected')} ${collectResult.collection.success}/${collectResult.collection.total} ${t('overview.dataStatus.factors')}` : collectResult.message || collectResult.status }}
+        </span>
+        <span v-if="collectError" class="overview__status-result overview__status-result--err">
+          {{ t('overview.dataStatus.refreshFailed') }}
+        </span>
+        <button
+          class="overview__refresh-btn"
+          :disabled="collecting"
+          @click="triggerManualCollect"
+        >
+          {{ collecting ? t('overview.dataStatus.refreshing') : t('overview.dataStatus.manualRefresh') }}
+        </button>
+      </div>
     </div>
 
     <div class="overview__grid">
@@ -483,9 +530,108 @@ watch(aiSummaryText, (newVal) => {
   50% { opacity: 0; }
 }
 
+/* Data Status Bar */
+.overview__status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  margin-bottom: 20px;
+  border-radius: 12px;
+}
+
+.overview__status-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  flex-wrap: wrap;
+}
+
+.overview__status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.overview__status-dot--realtime {
+  background: var(--risk-low);
+  box-shadow: 0 0 6px var(--risk-low);
+}
+
+.overview__status-dot--stale {
+  background: var(--risk-medium);
+  box-shadow: 0 0 6px var(--risk-medium);
+}
+
+.overview__status-dot--error {
+  background: var(--risk-high);
+  box-shadow: 0 0 6px var(--risk-high);
+}
+
+.overview__status-label {
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.overview__status-sep {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.overview__status-item {
+  font-size: 13px;
+}
+
+.overview__status-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.overview__status-result {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.overview__status-result--ok {
+  color: var(--risk-low);
+}
+
+.overview__status-result--err {
+  color: var(--risk-high);
+}
+
+.overview__refresh-btn {
+  padding: 4px 14px;
+  border: 1px solid var(--accent-primary);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--accent-primary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.overview__refresh-btn:hover:not(:disabled) {
+  background: var(--accent-primary);
+  color: #fff;
+}
+
+.overview__refresh-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 @media (max-width: 1200px) {
   .overview__grid { grid-template-columns: 1fr; }
   .overview__bottom-row { grid-template-columns: 1fr; }
+  .overview__status-bar { flex-direction: column; gap: 10px; }
 }
 
 /* Model Signals */

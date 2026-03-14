@@ -66,6 +66,29 @@ public class RiskServiceImpl implements RiskService {
         }
         vo.setTopFactors(factorVOs);
 
+        // 填充实时因子采集扩展字段
+        try {
+            String statusUrl = pythonEngineUrl + "/collect/status";
+            ResponseEntity<Map<String, Object>> statusResp = restTemplate.exchange(
+                    statusUrl, HttpMethod.GET, null,
+                    new ParameterizedTypeReference<>() {}
+            );
+            Map<String, Object> statusBody = statusResp.getBody();
+            if (statusBody != null) {
+                Object dataDate = statusBody.get("data_date");
+                Object predTime = statusBody.get("last_prediction_time");
+                vo.setDataDate(dataDate != null ? String.valueOf(dataDate) : "");
+                vo.setUpdatedAt(predTime != null ? String.valueOf(predTime) : "");
+                String collStatus = statusBody.get("last_collection_status") != null
+                        ? String.valueOf(statusBody.get("last_collection_status")) : "";
+                boolean isRealtime = "SUCCESS".equals(collStatus) || "PARTIAL".equals(collStatus);
+                vo.setDataSource(isRealtime ? "realtime" : "historical");
+            }
+        } catch (RestClientException e) {
+            log.debug("Could not fetch collect status for RiskCurrentVO: {}", e.getMessage());
+            vo.setDataSource("historical");
+        }
+
         return vo;
     }
 

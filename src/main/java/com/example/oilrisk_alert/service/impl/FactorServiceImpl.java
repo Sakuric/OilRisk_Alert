@@ -292,4 +292,52 @@ public class FactorServiceImpl implements FactorService {
         vo.setValue(f.getValue());
         return vo;
     }
+
+    @Override
+    public List<Map<String, Object>> getWeightHistory(int months) {
+        LocalDate end = LocalDate.now();
+        LocalDate start = end.minusMonths(months);
+
+        // 查询按日期+分类聚合的SHAP绝对值总和
+        List<Map<String, Object>> rawRows = factorMapper.findWeightHistory(start, end);
+        if (rawRows == null || rawRows.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // 按日期分组: {date -> {category -> totalShap}}
+        Map<String, Map<String, Double>> dateMap = new LinkedHashMap<>();
+        for (Map<String, Object> row : rawRows) {
+            String dateStr = String.valueOf(row.get("date"));
+            String category = String.valueOf(row.get("category"));
+            double shap = row.get("total_shap") != null
+                    ? ((Number) row.get("total_shap")).doubleValue() : 0.0;
+            dateMap.computeIfAbsent(dateStr, k -> new LinkedHashMap<>()).put(category, shap);
+        }
+
+        // 转为百分比格式的列表
+        List<Map<String, Object>> result = new ArrayList<>();
+        Map<String, String> categoryKeyMap = Map.of(
+                "SUPPLY_DEMAND", "supplyDemand",
+                "MACRO", "macro",
+                "FINANCIAL", "financial",
+                "GEOPOLITICAL", "geopolitical",
+                "SENTIMENT", "sentiment"
+        );
+
+        for (Map.Entry<String, Map<String, Double>> entry : dateMap.entrySet()) {
+            Map<String, Double> cats = entry.getValue();
+            double total = cats.values().stream().mapToDouble(Double::doubleValue).sum();
+            if (total <= 0) continue;
+
+            Map<String, Object> point = new LinkedHashMap<>();
+            point.put("date", entry.getKey());
+            for (Map.Entry<String, String> cm : categoryKeyMap.entrySet()) {
+                double raw = cats.getOrDefault(cm.getKey(), 0.0);
+                point.put(cm.getValue(), Math.round(raw / total * 10000.0) / 100.0);
+            }
+            result.add(point);
+        }
+
+        return result;
+    }
 }

@@ -2,7 +2,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores/app'
-import { getRadarScores, getFactorExplanation, updateWeights } from '@/api/factor'
+import { getRadarScores, getFactorExplanation, updateWeights, getWeightHistory } from '@/api/factor'
 import { getCurrentRisk } from '@/api/risk'
 import RadarChart from '@/components/charts/RadarChart.vue'
 import FactorShapChart from '@/components/charts/FactorShapChart.vue'
@@ -115,37 +115,24 @@ function resetWeights() {
   onWeightChange()
 }
 
-// 权重演变数据（mock，后续可替换为真实API）
+// 权重演变数据（从 API 获取真实数据）
 const weightHistoryData = ref<WeightDataPoint[]>([])
 
-function generateMockWeightData(): WeightDataPoint[] {
-  const data: WeightDataPoint[] = []
-  const base = { supplyDemand: 25, macro: 18, financial: 22, geopolitical: 20, sentiment: 15 }
-  for (let m = 0; m < 24; m++) {
-    const d = new Date(2023, m, 1)
-    const drift = () => (Math.random() - 0.5) * 6
-    const sd = Math.max(5, base.supplyDemand + drift())
-    const ma = Math.max(5, base.macro + drift())
-    const fi = Math.max(5, base.financial + drift())
-    const ge = Math.max(5, base.geopolitical + drift())
-    const total = sd + ma + fi + ge
-    const se = Math.max(5, 100 - total)
-    const norm = sd + ma + fi + ge + se
-    data.push({
-      date: d.toISOString().slice(0, 10),
-      supplyDemand: +(sd / norm * 100).toFixed(2),
-      macro: +(ma / norm * 100).toFixed(2),
-      financial: +(fi / norm * 100).toFixed(2),
-      geopolitical: +(ge / norm * 100).toFixed(2),
-      sentiment: +(se / norm * 100).toFixed(2),
-    })
+async function fetchWeightHistory() {
+  try {
+    const res = await getWeightHistory(24)
+    const data = res.data.data
+    if (data && data.length > 0) {
+      weightHistoryData.value = data
+    }
+  } catch (e) {
+    // Weight history is non-critical, silent fail
   }
-  return data
 }
 
 onMounted(() => {
   fetchData()
-  weightHistoryData.value = generateMockWeightData()
+  fetchWeightHistory()
 })
 
 onUnmounted(() => {

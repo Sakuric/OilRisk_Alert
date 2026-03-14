@@ -7,6 +7,7 @@ import com.example.oilrisk_alert.vo.WeightUpdateResultVO;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 public interface FactorService {
 
@@ -15,4 +16,6 @@ public interface FactorService {
     List<FactorVO> getExplain(LocalDate date);
 
     WeightUpdateResultVO updateWeights(WeightDTO dto);
+
+    List<Map<String, Object>> getWeightHistory(int months);
 }

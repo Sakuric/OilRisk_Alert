@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -35,5 +36,11 @@ public class FactorController {
     @PutMapping("/config/weights")
     public Result<WeightUpdateResultVO> updateWeights(@RequestBody WeightDTO dto) {
         return Result.success(factorService.updateWeights(dto));
+    }
+
+    @GetMapping("/factor/weight-history")
+    public Result<List<Map<String, Object>>> getWeightHistory(
+            @RequestParam(defaultValue = "24") int months) {
+        return Result.success(factorService.getWeightHistory(months));
     }
 }

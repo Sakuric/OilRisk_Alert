@@ -155,7 +155,20 @@ function getOption(): echarts.EChartsOption {
         color: textColor,
         fontSize: 10,
         rotate: 30,
+        formatter: (value: string) => {
+          const d = new Date(value)
+          if (isNaN(d.getTime())) return value
+          return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+        },
+        interval: (index: number) => {
+          if (index === 0) return true
+          const curr = props.dates[index]
+          const prev = props.dates[index - 1]
+          if (!curr || !prev) return false
+          return curr.slice(0, 7) !== prev.slice(0, 7)
+        },
       },
+      axisTick: { alignWithLabel: true },
       boundaryGap: false,
     },
     yAxis: [
