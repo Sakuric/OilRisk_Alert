@@ -159,29 +159,85 @@ onUnmounted(() => {
       <span class="factor-analysis__risk-label">{{ t('overview.gauge.riskIndex') }}</span>
       <span class="factor-analysis__risk-value" :style="{ color: riskColor }">{{ riskIndex.toFixed(1) }}</span>
       <span class="factor-analysis__risk-level" :style="{ color: riskColor }">{{ t('risk.level.' + riskLevel) }}</span>
-    </div>
-
-    <!-- Radar row -->
-    <div class="factor-analysis__card factor-analysis__radar">
-      <h3 class="factor-analysis__card-title">{{ t('factorAnalysis.radarTitle') }}</h3>
-      <RadarChart :data="radarData" :theme="themeMode" :locale="locale" />
+      <span class="factor-analysis__model-badge">Stacking (LSTM + XGBoost + Ridge)</span>
     </div>
 
     <!-- Weight Evolution Chart -->
     <div class="factor-analysis__card factor-analysis__weight-history">
       <h3 class="factor-analysis__card-title">{{ t('factorAnalysis.weightHistory') }}</h3>
+      <p class="factor-analysis__card-desc">{{ t('factorAnalysis.weightHistoryDesc') }}</p>
       <WeightAreaChart :data="weightHistoryData" />
     </div>
 
-    <!-- Bottom row: SHAP + Weights -->
+    <!-- Bottom row: SHAP + (Radar + Formula + Weights) -->
     <div class="factor-analysis__bottom">
       <div class="factor-analysis__card factor-analysis__shap">
-        <h3 class="factor-analysis__card-title">SHAP</h3>
+        <h3 class="factor-analysis__card-title">SHAP {{ t('factorAnalysis.shapModelDesc') }}</h3>
         <FactorShapChart :factors="shapFactors" :locale="locale" />
       </div>
 
       <div class="factor-analysis__card factor-analysis__weights">
+        <!-- Radar Chart -->
+        <h3 class="factor-analysis__card-title">{{ t('factorAnalysis.radarTitle') }}</h3>
+        <div class="factor-analysis__radar-inline">
+          <RadarChart :data="radarData" :theme="themeMode" :locale="locale" />
+        </div>
+
+        <div class="factor-analysis__formula-divider"></div>
+
+        <!-- Model Formula -->
+        <div class="factor-analysis__formula">
+          <h3 class="factor-analysis__card-title">{{ t('factorAnalysis.modelFormulaTitle') }}</h3>
+          <div class="factor-analysis__formula-content">
+            <div class="factor-analysis__formula-step">
+              <span class="factor-analysis__formula-label">{{ t('factorAnalysis.formulaBase') }}</span>
+              <code class="factor-analysis__formula-code">
+                R<sub>base</sub> = Stacking( LSTM<sub>return</sub> , XGBoost<sub>risk</sub> , MarketState )
+              </code>
+            </div>
+            <div class="factor-analysis__formula-step">
+              <span class="factor-analysis__formula-label">{{ t('factorAnalysis.formulaWeighted') }}</span>
+              <code class="factor-analysis__formula-code">
+                ratio = <span class="factor-analysis__formula-frac">
+                  <span class="factor-analysis__formula-num">
+                    <template v-for="(slider, idx) in weightSliders" :key="slider.key">
+                      <span
+                        class="factor-analysis__formula-weight"
+                        :class="{ 'factor-analysis__formula-weight--changed': weights[slider.key] !== 1.0 }"
+                      >w<sub>{{ slider.label }}</sub></span>
+                      <span v-if="idx < weightSliders.length - 1"> &middot; |SHAP<sub>{{ slider.label }}</sub>| + </span>
+                      <span v-else> &middot; |SHAP<sub>{{ slider.label }}</sub>|</span>
+                    </template>
+                  </span>
+                  <span class="factor-analysis__formula-denom">&Sigma; |SHAP<sub>i</sub>|</span>
+                </span>
+              </code>
+            </div>
+            <div class="factor-analysis__formula-step">
+              <span class="factor-analysis__formula-label">{{ t('factorAnalysis.formulaFinal') }}</span>
+              <code class="factor-analysis__formula-code">
+                R<sub>final</sub> = R<sub>base</sub> &times; ratio
+              </code>
+            </div>
+            <div class="factor-analysis__formula-weights">
+              <span
+                v-for="slider in weightSliders"
+                :key="slider.key"
+                class="factor-analysis__formula-tag"
+                :class="{ 'factor-analysis__formula-tag--changed': weights[slider.key] !== 1.0 }"
+              >
+                w<sub>{{ slider.label }}</sub> = {{ weights[slider.key].toFixed(1) }}
+              </span>
+            </div>
+            <p class="factor-analysis__formula-desc">{{ t('factorAnalysis.formulaDesc') }}</p>
+          </div>
+        </div>
+
+        <div class="factor-analysis__formula-divider"></div>
+
+        <!-- Weight Configuration -->
         <h3 class="factor-analysis__card-title">{{ t('factorAnalysis.weightConfig') }}</h3>
+        <p class="factor-analysis__card-desc">{{ t('factorAnalysis.weightConfigDesc') }}</p>
 
         <div
           v-for="slider in weightSliders"
@@ -283,6 +339,24 @@ onUnmounted(() => {
   font-weight: 600;
 }
 
+.factor-analysis__model-badge {
+  margin-left: auto;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: rgba(139, 92, 246, 0.08);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  font-family: monospace;
+}
+
+.factor-analysis__card-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: -8px 0 10px;
+}
+
 .factor-analysis__card {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
@@ -298,8 +372,8 @@ onUnmounted(() => {
   margin-bottom: 12px;
 }
 
-.factor-analysis__radar {
-  min-height: 320px;
+.factor-analysis__radar-inline {
+  height: 280px;
 }
 
 .factor-analysis__weight-history {
@@ -308,8 +382,9 @@ onUnmounted(() => {
 
 .factor-analysis__bottom {
   display: grid;
-  grid-template-columns: 3fr 2fr;
+  grid-template-columns: 1fr 1fr;
   gap: 16px;
+  align-items: start;
 }
 
 .factor-analysis__shap {
@@ -400,5 +475,109 @@ onUnmounted(() => {
   .factor-analysis__bottom {
     grid-template-columns: 1fr;
   }
+}
+
+/* Formula display (inside weights panel) */
+.factor-analysis__formula {
+  border-left: 3px solid var(--accent-primary, #8b5cf6);
+  padding-left: 12px;
+}
+
+.factor-analysis__formula-divider {
+  border-top: 1px solid var(--border-color);
+  margin: 4px 0;
+}
+
+.factor-analysis__formula-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.factor-analysis__formula-step {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.factor-analysis__formula-label {
+  flex: 0 0 auto;
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.factor-analysis__formula-code {
+  font-family: 'Cambria Math', 'Latin Modern Math', Georgia, serif;
+  font-size: 14px;
+  color: var(--text-primary);
+  background: rgba(139, 92, 246, 0.04);
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  overflow-x: auto;
+}
+
+.factor-analysis__formula-frac {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  vertical-align: middle;
+  margin: 0 4px;
+}
+
+.factor-analysis__formula-num {
+  border-bottom: 1px solid var(--text-primary);
+  padding-bottom: 2px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.factor-analysis__formula-denom {
+  padding-top: 2px;
+  font-size: 12px;
+}
+
+.factor-analysis__formula-weight {
+  transition: all 0.3s;
+}
+
+.factor-analysis__formula-weight--changed {
+  color: var(--accent-primary, #8b5cf6);
+  font-weight: 700;
+  text-shadow: 0 0 8px rgba(139, 92, 246, 0.4);
+}
+
+.factor-analysis__formula-weights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.factor-analysis__formula-tag {
+  font-family: monospace;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--hover-bg, rgba(0,0,0,0.04));
+  color: var(--text-secondary);
+  border: 1px solid transparent;
+  transition: all 0.3s;
+}
+
+.factor-analysis__formula-tag--changed {
+  color: var(--accent-primary, #8b5cf6);
+  border-color: var(--accent-primary, #8b5cf6);
+  background: rgba(139, 92, 246, 0.08);
+  font-weight: 600;
+}
+
+.factor-analysis__formula-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.5;
 }
 </style>

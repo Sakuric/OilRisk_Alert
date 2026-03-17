@@ -330,26 +330,32 @@ watch(aiSummaryText, (newVal) => {
 
 .overview__grid {
   display: grid;
-  grid-template-columns: 350px 1fr;
-  gap: 20px;
+  grid-template-columns: 320px 1fr;
+  gap: 16px;
 }
 
 .overview__col-left {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
 .overview__col-right {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
+  min-height: 0;
+}
+
+.overview__col-right > :first-child {
+  flex: 1;
+  min-height: 0;
 }
 
 .overview__bottom-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: 16px;
 }
 
 /* Glass card */
@@ -379,7 +385,7 @@ watch(aiSummaryText, (newVal) => {
 }
 
 .overview__card {
-  padding: 20px;
+  padding: 16px;
 }
 
 .overview__card-header {
@@ -398,11 +404,12 @@ watch(aiSummaryText, (newVal) => {
 }
 
 .chart-container {
-  height: 280px;
+  height: 240px;
 }
 
 .chart-container-large {
-  height: 400px;
+  height: 100%;
+  min-height: 350px;
 }
 
 /* Status dot */
@@ -421,7 +428,7 @@ watch(aiSummaryText, (newVal) => {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  max-height: 280px;
+  max-height: 240px;
   overflow-y: auto;
 }
 
@@ -535,8 +542,8 @@ watch(aiSummaryText, (newVal) => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 20px;
-  margin-bottom: 20px;
+  padding: 10px 16px;
+  margin-bottom: 16px;
   border-radius: 12px;
 }
 
@@ -632,6 +639,7 @@ watch(aiSummaryText, (newVal) => {
   .overview__grid { grid-template-columns: 1fr; }
   .overview__bottom-row { grid-template-columns: 1fr; }
   .overview__status-bar { flex-direction: column; gap: 10px; }
+  .chart-container-large { min-height: 300px; }
 }
 
 /* Model Signals */

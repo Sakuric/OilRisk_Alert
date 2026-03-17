@@ -32,6 +32,10 @@ let chart: echarts.ECharts | null = null
 const { isDark } = useTheme()
 const { t } = useI18n()
 
+// 当前可见数据范围（百分比），用于自适应标签密度
+const visibleStart = ref(80)
+const visibleEnd = ref(100)
+
 // 预警级别颜色配置 - 行业标准色
 const ALERT_COLORS = {
   Low: '#4CAF50',
@@ -66,6 +70,24 @@ const alertDataByLevel = computed(() => {
 
   return result
 })
+
+/**
+ * 根据当前可见范围计算时间粒度：
+ * - 可见天数 > 365 → 年粒度
+ * - 可见天数 > 90  → 月粒度
+ * - 否则           → 日粒度
+ */
+function getTimeGranularity(): 'year' | 'month' | 'day' {
+  const total = props.dates.length
+  if (total === 0) return 'year'
+  const visibleCount = Math.max(1, Math.round(total * (visibleEnd.value - visibleStart.value) / 100))
+  const first = new Date(props.dates[Math.floor(total * visibleStart.value / 100)] || props.dates[0])
+  const last = new Date(props.dates[Math.min(total - 1, Math.ceil(total * visibleEnd.value / 100))] || props.dates[total - 1])
+  const daySpan = Math.abs(last.getTime() - first.getTime()) / 86400000
+  if (daySpan > 365) return 'year'
+  if (daySpan > 90) return 'month'
+  return 'day'
+}
 
 function getOption(): echarts.EChartsOption {
   const dark = isDark.value
@@ -158,14 +180,33 @@ function getOption(): echarts.EChartsOption {
         formatter: (value: string) => {
           const d = new Date(value)
           if (isNaN(d.getTime())) return value
-          return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+          const granularity = getTimeGranularity()
+          if (granularity === 'day') {
+            return `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+          }
+          if (granularity === 'month') {
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+          }
+          return `${d.getFullYear()}`
         },
         interval: (index: number) => {
           if (index === 0) return true
           const curr = props.dates[index]
           const prev = props.dates[index - 1]
           if (!curr || !prev) return false
-          return curr.slice(0, 7) !== prev.slice(0, 7)
+          const granularity = getTimeGranularity()
+          if (granularity === 'day') {
+            // 日粒度：每7天显示一个标签
+            const currDate = new Date(curr)
+            const prevDate = new Date(prev)
+            return Math.abs(currDate.getTime() - prevDate.getTime()) >= 6 * 86400000
+              || curr.slice(0, 7) !== prev.slice(0, 7)
+          }
+          if (granularity === 'month') {
+            return curr.slice(0, 7) !== prev.slice(0, 7)
+          }
+          // 年粒度
+          return new Date(curr).getFullYear() !== new Date(prev).getFullYear()
         },
       },
       axisTick: { alignWithLabel: true },
@@ -196,13 +237,13 @@ function getOption(): echarts.EChartsOption {
     dataZoom: [
       {
         type: 'inside',
-        start: 0,
-        end: 100,
+        start: visibleStart.value,
+        end: visibleEnd.value,
       },
       {
         type: 'slider',
-        start: 0,
-        end: 100,
+        start: visibleStart.value,
+        end: visibleEnd.value,
         height: 25,
         bottom: 10,
         textStyle: { color: textColor },
@@ -279,6 +320,8 @@ function getOption(): echarts.EChartsOption {
   }
 }
 
+let updatingFromZoom = false
+
 function initChart() {
   if (!chartRef.value) return
   chart = echarts.init(chartRef.value)
@@ -288,6 +331,19 @@ function initChart() {
     if (params.seriesType === 'scatter' && params.data._alert) {
       emit('selectAlert', params.data._alert)
     }
+  })
+
+  // 监听缩放事件，自适应标签粒度
+  chart.on('datazoom', () => {
+    if (updatingFromZoom) return
+    const opt = chart?.getOption() as any
+    if (opt?.dataZoom?.[0]) {
+      visibleStart.value = opt.dataZoom[0].start ?? 80
+      visibleEnd.value = opt.dataZoom[0].end ?? 100
+    }
+    updatingFromZoom = true
+    updateChart()
+    updatingFromZoom = false
   })
 }
 

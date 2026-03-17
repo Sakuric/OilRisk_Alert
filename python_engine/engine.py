@@ -93,6 +93,29 @@ def _classify_factor(name: str) -> str:
     return "OTHER"
 
 
+def _calc_risk_score(pred_return_pct: float) -> float:
+    """
+    将 Stacking 预测收益率映射为 0-100 风险分数。
+
+    使用分段线性映射 + 软截断，相比纯 Sigmoid 在高风险区域保留更多区分度。
+    pred_return_pct > 0 → 低风险（预测上涨）
+    pred_return_pct < 0 → 高风险（预测下跌）
+
+    映射关系:
+      +10%→15, +5%→30, 0%→50, -5%→70, -10%→85, -15%→92
+    """
+    # 截断极端值，防止溢出且保留区分度
+    clamped = max(-30.0, min(30.0, pred_return_pct))
+    # 分段线性: 斜率 -4/%, 中心 50
+    raw = 50.0 - clamped * 4.0
+    # Sigmoid 软截断到 [3, 97]，避免硬截断的不连续感
+    if raw <= 3:
+        return 3.0
+    if raw >= 97:
+        return 97.0
+    return raw
+
+
 # ── 特征名中文映射表 ──
 FEATURE_NAME_ZH = {
     # 风险/情绪指标
@@ -463,7 +486,7 @@ class OilRiskEngine:
         pred_return_pct, _ = self._stacking_predict(
             market_state, lstm_impl_return, xgb_risk_score
         )
-        risk_score = max(0, min(100, 50 - pred_return_pct * 10))
+        risk_score = _calc_risk_score(pred_return_pct)
 
         # 构建因子列表
         factors = []
@@ -513,11 +536,16 @@ class OilRiskEngine:
         )
 
         # 风险分数
-        risk_score = 50 - (pred_return_pct * 10)
+        risk_score = _calc_risk_score(pred_return_pct)
         risk_score = max(0, min(100, risk_score))
         level = "High" if risk_score >= 70 else "Low" if risk_score < 40 else "Medium"
 
         last_date = str(df_feat.index[-1].date())
+
+        logger.info(
+            "predict_daily: date=%s, pred_return=%.3f%%, risk_score=%.2f, level=%s",
+            last_date, pred_return_pct, risk_score, level,
+        )
 
         return {
             "dashboard": {

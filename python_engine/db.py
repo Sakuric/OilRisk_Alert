@@ -527,7 +527,7 @@ def _auto_generate_alert(
     - High: risk_score >= 65
     - Medium: risk_score >= 45
     - Low: risk_score >= 30
-    已存在同日同级别预警则跳过。
+    每日仅保留一条预警（新结果覆盖旧记录）。
     """
     if risk_score < 30:
         return
@@ -541,13 +541,12 @@ def _auto_generate_alert(
 
     session = get_session()
     try:
-        # 检查同日是否已有该级别预警
-        existing = session.execute(
-            text("SELECT id FROM alert WHERE `date` = :dt AND level = :lv LIMIT 1"),
-            {"dt": dt, "lv": alert_level},
-        ).fetchone()
-        if existing:
-            return
+        # 同日只保留一条预警：先删除旧的，再插入新的
+        session.execute(
+            text("DELETE FROM alert WHERE `date` = :dt"),
+            {"dt": dt},
+        )
+        session.commit()
 
         # 获取 top factor 信息
         trigger_factor = ""

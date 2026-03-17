@@ -331,3 +331,36 @@ def collect_auto_backfill(lookback_days: int = Query(default=90, ge=1, le=365)):
     except Exception as e:
         logger.exception("collect_auto_backfill failed")
         raise HTTPException(500, str(e))
+
+
+@app.post("/collect/rebuild-alerts")
+def rebuild_alerts():
+    """
+    重建全部预警记录：读取 risk_index 表的每条记录，
+    删除旧预警后用当前阈值重新生成。用于修复历史重复/错误预警。
+    """
+    try:
+        import db as _db
+        from sqlalchemy import text
+
+        session = _db.get_session()
+        try:
+            rows = session.execute(
+                text("SELECT `date`, risk_index, risk_level FROM risk_index ORDER BY `date` ASC")
+            ).fetchall()
+        finally:
+            session.close()
+
+        if not rows:
+            return {"rebuilt": 0, "message": "risk_index table is empty"}
+
+        rebuilt = 0
+        for row in rows:
+            dt, score, level = row[0], float(row[1]), row[2]
+            _db._auto_generate_alert(dt, score, level, [])
+            rebuilt += 1
+
+        return {"rebuilt": rebuilt, "message": f"Rebuilt alerts for {rebuilt} dates"}
+    except Exception as e:
+        logger.exception("rebuild_alerts failed")
+        raise HTTPException(500, str(e))
