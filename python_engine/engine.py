@@ -571,6 +571,37 @@ class OilRiskEngine:
         对 [start_date, end_date] 区间做回测。
         model: "XGBoost" | "LSTM" | "Stacking"
         """
+        # 先尝试从 DB 合并最新数据（包含 CSV 之后采集的因子）
+        try:
+            import db as db_module
+            csv_end_date = self.df_raw.index[-1].date()
+            all_date_factors = db_module.get_all_factors_since(csv_end_date)
+            if all_date_factors:
+                new_dfs = []
+                for dt in sorted(all_date_factors.keys()):
+                    factors = all_date_factors[dt]
+                    if not factors:
+                        continue
+                    row_df = pd.DataFrame([factors], index=pd.DatetimeIndex([pd.Timestamp(dt)]))
+                    new_dfs.append(row_df)
+                if new_dfs:
+                    new_data = pd.concat(new_dfs)
+                    for col in self.df_raw.columns:
+                        if col not in new_data.columns:
+                            new_data[col] = np.nan
+                    self.df_raw = pd.concat([self.df_raw, new_data[self.df_raw.columns]])
+                    self.df_raw = self.df_raw[~self.df_raw.index.duplicated(keep="last")]
+                    self.df_raw = self.df_raw.sort_index()
+                    self.df_raw = self.df_raw.ffill().bfill()
+                    # 重建 LSTM 特征
+                    wti_valid = self.df_raw[self.df_raw[TARGET_COL].notna()].index
+                    df_valid = self.df_raw.loc[wti_valid]
+                    self.df_feat = _build_lstm_features(df_valid)
+                    self._shap_cache = None
+                    logger.info("predict_backtest: merged %d dates from DB", len(new_dfs))
+        except Exception as e:
+            logger.warning("predict_backtest: DB merge failed, using CSV data: %s", e)
+
         start = pd.Timestamp(start_date)
         end = pd.Timestamp(end_date)
 
