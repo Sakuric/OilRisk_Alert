@@ -571,11 +571,12 @@ class OilRiskEngine:
         对 [start_date, end_date] 区间做回测。
         model: "XGBoost" | "LSTM" | "Stacking"
         """
-        # 先尝试从 DB 合并最新数据（包含 CSV 之后采集的因子）
+        # 从 DB 合并因子数据（覆盖 CSV 中可能的填充值）
         try:
             import db as db_module
-            csv_end_date = self.df_raw.index[-1].date()
-            all_date_factors = db_module.get_all_factors_since(csv_end_date)
+            # 从回测开始日期的前一天开始合并（确保覆盖范围）
+            csv_start_date = self.df_raw.index[0].date()
+            all_date_factors = db_module.get_all_factors_since(csv_start_date)
             if all_date_factors:
                 new_dfs = []
                 for dt in sorted(all_date_factors.keys()):
@@ -589,6 +590,7 @@ class OilRiskEngine:
                     for col in self.df_raw.columns:
                         if col not in new_data.columns:
                             new_data[col] = np.nan
+                    # 合并：DB 数据优先覆盖 CSV
                     self.df_raw = pd.concat([self.df_raw, new_data[self.df_raw.columns]])
                     self.df_raw = self.df_raw[~self.df_raw.index.duplicated(keep="last")]
                     self.df_raw = self.df_raw.sort_index()
@@ -598,7 +600,8 @@ class OilRiskEngine:
                     df_valid = self.df_raw.loc[wti_valid]
                     self.df_feat = _build_lstm_features(df_valid)
                     self._shap_cache = None
-                    logger.info("predict_backtest: merged %d dates from DB", len(new_dfs))
+                    logger.info("predict_backtest: merged %d dates from DB, df_raw now ends at %s",
+                                len(new_dfs), self.df_raw.index[-1].date())
         except Exception as e:
             logger.warning("predict_backtest: DB merge failed, using CSV data: %s", e)
 
