@@ -80,7 +80,6 @@ const alertDataByLevel = computed(() => {
 function getTimeGranularity(): 'year' | 'month' | 'day' {
   const total = props.dates.length
   if (total === 0) return 'year'
-  const visibleCount = Math.max(1, Math.round(total * (visibleEnd.value - visibleStart.value) / 100))
   const first = new Date(props.dates[Math.floor(total * visibleStart.value / 100)] || props.dates[0])
   const last = new Date(props.dates[Math.min(total - 1, Math.ceil(total * visibleEnd.value / 100))] || props.dates[total - 1])
   const daySpan = Math.abs(last.getTime() - first.getTime()) / 86400000

@@ -1,0 +1,15 @@
+.git
+.idea
+.vscode
+target
+frontend/node_modules
+frontend/dist
+**/__pycache__
+**/*.pyc
+memory
+docs
+md
+doc
+test_picture
+*.pdf
+data/oilrisk.mv.db
